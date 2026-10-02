@@ -28,6 +28,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Build monthly sports calendar
+        env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: python scraper/scraper.py
       - name: Setup Pages
         uses: actions/configure-pages@v5
