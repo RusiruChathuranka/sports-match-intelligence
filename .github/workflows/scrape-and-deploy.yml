@@ -3,7 +3,7 @@ name: Scrape sports and deploy
 on:
   workflow_dispatch:
   schedule:
-    - cron: "15 */3 * * *"
+    - cron: "15 */6 * * *"
   push:
     branches: [main]
 
@@ -27,9 +27,7 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Scrape sources
-        env:
-          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+      - name: Build monthly sports calendar
         run: python scraper/scraper.py
       - name: Setup Pages
         uses: actions/configure-pages@v5
