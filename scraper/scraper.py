@@ -126,6 +126,8 @@ def make_event(sport, competition, event_name, start_time, status, event_type, s
         "source": source,
         "source_url": source_url,
         "importance": float(importance),
+        "home_score": None,
+        "away_score": None,
     }
 
 
@@ -297,6 +299,9 @@ def source_validation():
 def main():
     days = month_dates(TARGET_MONTH)
     out = []
+
+    # Use the exact requested source pages when Firecrawl is configured; public feeds remain the fallback.
+    out.extend(firecrawl_requested_sources())
 
     # Primary cricket feed.
     with ThreadPoolExecutor(max_workers=12) as pool:
