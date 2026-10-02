@@ -183,6 +183,10 @@ def sofascore_events(sport_slug, day):
         x = make_event(SPORTS[sport_slug], comp, name, start, st, event_type,
                        "SofaScore", source_url, p1, p2, importance)
         if x:
+            hs=(e.get("homeScore") or {}).get("display") or (e.get("homeScore") or {}).get("current")
+            aw=(e.get("awayScore") or {}).get("display") or (e.get("awayScore") or {}).get("current")
+            x["home_score"]=hs
+            x["away_score"]=aw
             out.append(x)
     return out
 
