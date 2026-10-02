@@ -16,7 +16,7 @@ OUT = Path("data/matches.json")
 LOCAL_TZ = ZoneInfo("Asia/Colombo")
 TARGET_MONTH = os.getenv("TARGET_MONTH", datetime.now(LOCAL_TZ).strftime("%Y-%m"))
 
-SOFA_BASE = "https://www.sofascore.com/api/v1"
+SOFA_BASE = "https://api.sofascore.com/api/v1"
 CRICINFO_BASE = "https://hs-consumer-api.espncricinfo.com/v1/pages"
 
 # Requested source pages. These are also exposed in the dashboard as source provenance.
@@ -141,7 +141,10 @@ def sofascore_events(sport_slug, day):
             f"{SOFA_BASE}/sport/tennis/scheduled-events/{day}",
         ]
     else:
-        urls = [f"{SOFA_BASE}/sport/{sport_slug}/scheduled-events/{day}"]
+        urls = [
+            f"{SOFA_BASE}/sport/{sport_slug}/scheduled-events/{day}/inverse",
+            f"{SOFA_BASE}/sport/{sport_slug}/scheduled-events/{day}",
+        ]
 
     raw_events = []
     for url in urls:
@@ -150,8 +153,6 @@ def sofascore_events(sport_slug, day):
         except Exception:
             continue
         raw_events.extend(extract_event_objects(body))
-        if raw_events:
-            break
 
     out = []
     for e in raw_events:
@@ -338,6 +339,10 @@ def main():
             dedup[key] = x
 
     matches = sorted(dedup.values(), key=lambda x: x["start_time"])
+    print(f"Raw collected events: {len(out)}")
+    print(f"Deduplicated events: {len(matches)}")
+    if not matches:
+        raise RuntimeError("No sports events were collected. Check source availability/API responses.")
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "target_month": TARGET_MONTH,
