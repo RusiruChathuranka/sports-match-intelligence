@@ -251,6 +251,39 @@ def cricinfo_matches(day):
     return out
 
 
+
+FIRECRAWL_SCHEMA = {"type":"object","properties":{"events":{"type":"array","items":{"type":"object","properties":{"sport":{"type":"string"},"competition":{"type":"string"},"event_name":{"type":"string"},"participant_1":{"type":["string","null"]},"participant_2":{"type":["string","null"]},"start_time":{"type":"string"},"status":{"type":"string"},"event_type":{"type":"string"},"importance":{"type":"number"}},"required":["sport","competition","event_name","start_time","status","event_type"]}}},"required":["events"]}
+
+def firecrawl_requested_sources():
+    api_key=os.getenv("FIRECRAWL_API_KEY")
+    if not api_key: return []
+    prompt=("Extract real sports events visible on this page. Include scheduled/upcoming and live events. "
+            "Return sport, competition, event name, participant 1, participant 2, start_time as ISO 8601 "
+            "with timezone if provided, status, event_type and importance. Never invent dates or times.")
+    out=[]
+    sources=list(SKY_SOURCES.items())+[("ESPNcricinfo",CRICKET_SOURCE)]
+    for source_name,url in sources:
+        try:
+            r=requests.post("https://api.firecrawl.dev/v2/scrape",
+                headers={"Authorization":f"Bearer {api_key}","Content-Type":"application/json"},
+                json={"url":url,"formats":[{"type":"json","schema":FIRECRAWL_SCHEMA,"prompt":prompt}],"onlyMainContent":True},
+                timeout=75)
+            r.raise_for_status()
+            payload=r.json()
+            data=payload.get("data",{}).get("json") or payload.get("json") or {}
+            for e in data.get("events",[]):
+                start=clean_text(e.get("start_time"))
+                if not start: continue
+                sport="F1" if source_name=="F1" else (clean_text(e.get("sport")) or source_name)
+                x=make_event(sport,e.get("competition"),e.get("event_name"),start,status_name(e.get("status")),
+                             e.get("event_type") or "match",source_name,url,e.get("participant_1"),e.get("participant_2"),
+                             e.get("importance") or 7)
+                if x: out.append(x)
+            print("Firecrawl",source_name,len(data.get("events",[])))
+        except Exception as ex:
+            print("Firecrawl optional source failed:",source_name,ex)
+    return out
+
 def source_validation():
     # The requested Sky/ESPNcricinfo pages are retained as source links. Full monthly
     # coverage comes from their dated schedules where available plus SofaScore fallback.
