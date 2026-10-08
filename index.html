@@ -4,21 +4,22 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>BETSS Sports Match Intelligence</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&display=swap');
 :root{--bg:#07101d;--panel:#0d1728;--panel2:#111e32;--line:#22354f;--text:#eff6ff;--muted:#8ea2bf;--blue:#5ba7ff;--purple:#7965ff;--good:#4ade80;--warn:#facc15;--radius:18px;--shadow:0 20px 55px rgba(0,0,0,.24)}
-*{box-sizing:border-box}body{margin:0;color:var(--text);background:radial-gradient(circle at 15% 0,#152a48 0,#07101d 43%,#050a13 100%);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;color:var(--text);background:radial-gradient(circle at 15% 0,#152a48 0,#07101d 43%,#050a13 100%);font:14px/1.45 "FMono-Regular",Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
 button,input,select{font:inherit}.app{max-width:1540px;margin:auto;padding:26px 26px 48px}
 .top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:22px}.brand{display:flex;gap:14px;align-items:center}.logo{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;color:white;font-weight:950;background:linear-gradient(135deg,#4396ff,#775eff);box-shadow:0 14px 34px rgba(73,111,255,.28)}
-.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.18em;font-weight:900;color:#7fa2cf}.title{font-size:28px;font-weight:950;letter-spacing:-.03em}.subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.18em;font-weight:900;color:#7fa2cf}.title{font-family:"Archivo","Archivo Fallback",ui-sans-serif,sans-serif;font-size:30px;font-weight:900;letter-spacing:-.03em}.subtitle{font-size:12px;color:var(--muted);margin-top:2px}
 .top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.btn,.now{height:38px;border:1px solid var(--line);border-radius:11px;background:#0c1728;color:var(--text);padding:0 12px;font-weight:850}.btn{cursor:pointer}.btn.primary{background:linear-gradient(135deg,#4d9dff,#705cff);border-color:transparent}.now{display:flex;align-items:center;gap:7px;color:#b8c9df;font-size:11px}.dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(74,222,128,.10)}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:13px}.card{background:linear-gradient(180deg,rgba(17,30,51,.94),rgba(12,22,39,.96));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.kpi{padding:17px 18px;min-height:116px}.label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:900}.value{font-size:34px;font-weight:950;line-height:1;margin:9px 0 5px}.kfoot{font-size:10px;color:#9caec7}
-.layout{display:grid;grid-template-columns:1.65fr 1fr;gap:13px;margin-bottom:13px}.panel{padding:18px}.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:15px}.ptitle{font-size:15px;font-weight:900}.psub{font-size:10px;color:var(--muted);margin-top:2px}.badge{font-size:9px;font-weight:950;padding:6px 9px;border:1px solid #2d4667;background:#12233b;border-radius:999px;color:#bad1ed}
-.hero{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.hero-card{padding:13px;border-radius:14px;background:linear-gradient(180deg,#142844,#0e1b2e);border:1px solid #2a4567}.sig{display:inline-block;padding:4px 7px;border-radius:7px;font-size:9px;font-weight:950;text-transform:uppercase}.sig.promote{background:#6ee7b7;color:#05291d}.sig.consider{background:#fcd34d;color:#392800}.sig.monitor{background:#263a55;color:#dae6f4}.hsport{font-size:9px;color:#7fa6d5;font-weight:900;text-transform:uppercase;margin:10px 0 5px}.hevent{font-size:13px;font-weight:950;line-height:1.25}.hcomp{font-size:10px;color:#9db0c8;margin-top:6px}.hmeta{display:flex;justify-content:space-between;gap:8px;margin-top:11px;padding-top:9px;border-top:1px solid #27415f;color:#b7c9df;font-size:9px}.reason{color:#80a8d6}
+.layout{display:grid;grid-template-columns:1.65fr 1fr;gap:13px;margin-bottom:13px}.panel{padding:18px}.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:15px}.ptitle,.label,.eyebrow,.badge,.tab,.btn{font-family:"Archivo","Archivo Fallback",ui-sans-serif,sans-serif}.ptitle{font-size:16px;font-weight:800}.psub{font-size:10px;color:var(--muted);margin-top:2px}.badge{font-size:9px;font-weight:950;padding:6px 9px;border:1px solid #2d4667;background:#12233b;border-radius:999px;color:#bad1ed}
+.hero{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.hero-card{padding:13px;border-radius:14px;background:linear-gradient(180deg,#142844,#0e1b2e);border:1px solid #2a4567}.sig{display:inline-block;padding:4px 7px;border-radius:7px;font-size:9px;font-weight:950;text-transform:uppercase}.sig.promote{background:#6ee7b7;color:#05291d}.sig.consider{background:#fcd34d;color:#392800}.sig.monitor{background:#263a55;color:#dae6f4}.hsport{font-size:10px;color:#7fa6d5;font-weight:900;text-transform:uppercase;margin:10px 0 5px}.hevent{font-size:14px;font-weight:950;line-height:1.28}.hcomp{font-size:10px;color:#9db0c8;margin-top:6px}.hmeta{display:flex;justify-content:space-between;gap:8px;margin-top:11px;padding-top:9px;border-top:1px solid #27415f;color:#b7c9df;font-size:9px}.reason{color:#80a8d6}
 .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cat{padding:10px;border:1px solid #233850;border-radius:12px;background:#0c1729}.cat-top{display:flex;justify-content:space-between;gap:8px}.cat-name{font-size:10px;font-weight:900}.cat-count{font-size:11px;font-weight:950}.track{height:5px;border-radius:99px;background:#17283f;overflow:hidden;margin-top:8px}.fill{height:100%;background:linear-gradient(90deg,#5ba7ff,#7965ff);border-radius:99px}
 .chart{height:142px;display:flex;align-items:flex-end;gap:5px;padding-top:10px;overflow:hidden}.bar-col{height:100%;flex:1;min-width:4px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px}.bar-v{font-size:8px;color:#9bb0cb}.bar{width:100%;max-width:20px;min-height:4px;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,#69b1ff,#6f60ff)}.bar-l{font-size:8px;color:#5e7594}
 .tabs{display:flex;gap:6px}.tab{border:1px solid var(--line);background:#0b1627;color:#9eb1ca;border-radius:9px;padding:8px 11px;font-size:10px;font-weight:900;cursor:pointer}.tab.active{background:#19304c;color:#e2efff;border-color:#3f6794}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}.search,.select{height:38px;border-radius:10px;border:1px solid var(--line);background:#0a1525;color:var(--text);padding:0 11px;outline:none}.search{min-width:250px;flex:1}
 .table-wrap{overflow:auto;border:1px solid #20324b;border-radius:13px}table{width:100%;min-width:1000px;border-collapse:collapse}thead th{padding:10px 11px;background:#091525;color:#6f86a5;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #1f3047}tbody td{padding:11px;border-bottom:1px solid #1b2b41;font-size:11px;vertical-align:top}tbody tr:hover{background:#0e1a2d}
-.date-main{font-weight:900}.date-sub{font-size:9px;color:#6d839e;margin-top:2px}.time{font-weight:950;color:#cae0f7}.tiny{font-size:9px;color:#667e9d}.sport-cell{font-weight:900}.comp{color:#a8b8cc}.event{font-weight:900;color:#eef6ff}.event a{text-decoration:none}.event a:hover{text-decoration:underline}.flags{margin-right:5px}.tournament-line{display:block;color:#6f87a5;font-size:9px;margin-top:3px}.hero-date{color:#f4c95d;font-weight:950}.score{font-weight:950}.why{display:block;max-width:240px;color:#6e86a4;font-size:9px;margin-top:4px}
+.date-main{font-weight:900}.date-sub{font-size:9px;color:#6d839e;margin-top:2px}.time{font-weight:950;color:#cae0f7}.tiny{font-size:9px;color:#667e9d}.sport-cell{font-weight:900}.comp{color:#a8b8cc}.event{font-weight:900;color:#eef6ff}.event a{text-decoration:none}.event a:hover{text-decoration:underline}.flags{margin-right:5px}.tournament-line{display:block;color:#6f87a5;font-size:9px;margin-top:3px}.hero-date{color:#f4c95d;font-weight:950}.format-tag{display:inline-block;margin-left:6px;padding:2px 5px;border:1px solid #345579;background:#152b47;border-radius:5px;color:#bcd7f2;font-size:8px;font-weight:950;vertical-align:1px}.score{font-weight:950}.why{display:block;max-width:240px;color:#6e86a4;font-size:9px;margin-top:4px}
 .cover{display:grid;grid-template-columns:1fr 1fr;gap:8px}.source{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px;border:1px solid #233852;background:#0b1628;border-radius:11px}.sl{display:flex;gap:7px;align-items:center}.sdot{width:7px;height:7px;border-radius:50%}.ok{background:var(--good)}.warn{background:var(--warn)}.empty{background:#64748b}.sn{font-size:10px;font-weight:900}.sm{font-size:9px;color:#6e839f}.sc{font-size:11px;font-weight:950}.help{padding:13px;border:1px solid #253a55;border-radius:12px;background:#0b1728;color:#8fa5c1;font-size:10px}.help b{color:#e2efff}.footer{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;color:#677d9b;font-size:10px;margin-top:13px}
 .empty-box{padding:26px;text-align:center;color:var(--muted);border:1px dashed #2a4262;border-radius:12px}
 @media(max-width:1120px){.layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.app{padding:15px 11px 30px}.top{flex-direction:column}.top-actions{justify-content:flex-start}.kpis{grid-template-columns:1fr 1fr}.hero{grid-template-columns:1fr}.cat-grid,.cover{grid-template-columns:1fr}.title{font-size:23px}.panel{padding:14px}.search{min-width:170px}}
@@ -68,7 +69,7 @@ button,input,select{font:inherit}.app{max-width:1540px;margin:auto;padding:26px 
 
 <section class="layout" style="margin-top:13px">
   <div class="card panel"><div class="head"><div><div class="ptitle">🛰️ Source health</div><div class="psub">Current-month coverage status</div></div></div><div class="cover" id="coverage"></div></div>
-  <div class="card panel"><div class="head"><div><div class="ptitle">🧭 Signal logic</div><div class="psub">What the promotion score means</div></div></div><div class="help"><b>Promote</b> = strongest candidate for homepage, banner or push planning.<br><br><b>Consider</b> = useful secondary opportunity.<br><br><b>Monitor</b> = lower-priority fixture.<br><br>The score uses sport priority, marquee competition, international status, recognizable teams, Sri Lanka involvement and local-time fit. It does <b>not</b> use bookmaker odds and does not guarantee conversion.</div></div>
+  <div class="card panel"><div class="head"><div><div class="ptitle">🧭 Signal logic</div><div class="psub">What the promotion score means</div></div></div><div class="help"><b>Promote</b> = strongest candidate for homepage, banner or push planning.<br><br><b>Consider</b> = useful secondary opportunity.<br><br><b>Monitor</b> = lower-priority fixture.<br><br>The promotion board is cricket-only and prioritizes Sri Lanka, India, Pakistan, England, Australia, South Africa, New Zealand, Bangladesh, West Indies and Afghanistan fixtures. The general score uses sport priority, marquee competition, international status, recognizable teams and local-time fit. It does <b>not</b> use bookmaker odds and does not guarantee conversion.</div></div>
 </section>
 
 <footer class="footer"><span id="sourceNote">Loading data…</span><span id="updated">Last refresh —</span></footer>
@@ -77,6 +78,8 @@ button,input,select{font:inherit}.app{max-width:1540px;margin:auto;padding:26px 
 <script>
 var TZ="Asia/Colombo",state={matches:[],data:null,range:"today"},$=function(id){return document.getElementById(id)};
 var icon={Cricket:"🏏",Soccer:"⚽",Tennis:"🎾",Basketball:"🏀",Rugby:"🏉","Formula 1":"🏎️",Esports:"🎮",Boxing:"🥊",Badminton:"🏸",Volleyball:"🏐","Horse Racing":"🏇"};
+var countryCodes={"sri lanka":"LK","india":"IN","pakistan":"PK","england":"GB","australia":"AU","south africa":"ZA","new zealand":"NZ","bangladesh":"BD","west indies":"WI","afghanistan":"AF","ireland":"IE","zimbabwe":"ZW","namibia":"NA","uae":"AE","united arab emirates":"AE","nepal":"NP","oman":"OM","scotland":"GB","netherlands":"NL","france":"FR","germany":"DE","spain":"ES","italy":"IT","portugal":"PT","brazil":"BR","argentina":"AR","japan":"JP","south korea":"KR","china":"CN","hong kong":"HK","taiwan":"TW","canada":"CA","usa":"US","united states":"US","turkey":"TR","switzerland":"CH","belgium":"BE","czech republic":"CZ","czechia":"CZ","greece":"GR","romania":"RO","serbia":"RS","croatia":"HR","slovenia":"SI","slovakia":"SK","hungary":"HU","poland":"PL"};
+var promoCountries=["Sri Lanka","India","Pakistan","England","Australia","South Africa","New Zealand","Bangladesh","West Indies","Afghanistan"];
 
 function esc(s){return String(s||"").replace(/[&<>"']/g,function(m){return({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"})[m]})}
 function dateKey(){return new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
@@ -87,8 +90,23 @@ function localTime(iso){return new Intl.DateTimeFormat("en-GB",{timeZone:TZ,hour
 function nowText(){return new Intl.DateTimeFormat("en-GB",{timeZone:TZ,weekday:"short",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date())}
 function next7(iso){var n=Date.now(),t=new Date(iso).getTime();return t>=n&&t<n+604800000}
 function flag(code){if(!code||code.length!==2)return"";return String.fromCodePoint.apply(null,code.toUpperCase().split("").map(function(c){return 127397+c.charCodeAt(0)}))}
+function inferFlagCode(name){
+  var n=String(name||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+  if(countryCodes[n])return countryCodes[n];
+  var keys=Object.keys(countryCodes);
+  for(var i=0;i<keys.length;i++)if(n.indexOf(keys[i])>=0)return countryCodes[keys[i]];
+  return "";
+}
+function flagFor(code,name){return flag(code||inferFlagCode(name))}
+function isPromoCricket(x){
+  if(x.sport!=="Cricket"||x.status==="finished"||x.status==="cancelled")return false;
+  var a=String(x.participant_1||"").toLowerCase(),b=String(x.participant_2||"").toLowerCase();
+  if(!(x.is_country_match===true)) return false;
+  return promoCountries.some(function(c){return a.indexOf(c.toLowerCase())>=0||b.indexOf(c.toLowerCase())>=0});
+}
 function eventName(x){
-  var flags=(x.participant_1_country_code||x.participant_2_country_code)?'<span class="flags">'+flag(x.participant_1_country_code)+flag(x.participant_2_country_code)+'</span>':'';
+  var f1=flagFor(x.participant_1_country_code,x.participant_1),f2=flagFor(x.participant_2_country_code,x.participant_2);
+  var flags=(f1||f2)?'<span class="flags">'+f1+f2+'</span>':'';
   if(x.participant_1&&x.participant_2){
     return flags+esc(x.participant_1)+' <span style="color:#6d819c">vs</span> '+esc(x.participant_2);
   }
@@ -96,7 +114,7 @@ function eventName(x){
 }
 function sigClass(x){return String(x||"Monitor").toLowerCase()}
 function cats(el,counts){
-  var arr=Object.entries(counts||{}).sort(function(a,b){return b[1]-a[1]}),max=Math.max.apply(null,[1].concat(arr.map(function(x){return x[1]})));
+  var arr=Object.entries(counts||{}).sort(function(a,b){if(a[0]==="Cricket")return -1;if(b[0]==="Cricket")return 1;return b[1]-a[1]}),max=Math.max.apply(null,[1].concat(arr.map(function(x){return x[1]})));
   $(el).innerHTML=arr.length?arr.map(function(x){return '<div class="cat"><div class="cat-top"><div class="cat-name">'+(icon[x[0]]||"•")+' '+esc(x[0])+'</div><div class="cat-count">'+x[1]+'</div></div><div class="track"><div class="fill" style="width:'+Math.max(2,x[1]/max*100)+'%"></div></div></div>'}).join(""):'<div class="empty-box">No data.</div>';
 }
 function render(){
@@ -105,26 +123,24 @@ function render(){
   $("kToday").textContent=a.today_match_count!=null?a.today_match_count:state.matches.filter(function(x){return localDate(x.start_time)===today}).length;
   $("kMonth").textContent=a.month_match_count!=null?a.month_match_count:state.matches.length;
   $("kWeek").textContent=state.matches.filter(function(x){return next7(x.start_time)}).length;
-  $("kPromote").textContent=state.matches.filter(function(x){return localDate(x.start_time)===today&&x.status!=="finished"&&x.status!=="cancelled"&&x.is_country_match===true&&x.promotion_signal==="Promote"}).length;
+  $("kPromote").textContent=state.matches.filter(function(x){return localDate(x.start_time)===today&&isPromoCricket(x)&&x.promotion_signal==="Promote"}).length;
   var md=new Date(month+"-01T00:00:00Z");
   $("monthLabel").textContent=new Intl.DateTimeFormat("en-US",{month:"long",year:"numeric"}).format(md);
   $("monthBadge").textContent=(a.month_match_count||state.matches.length)+" matches";
-  var eligible=state.matches.filter(function(x){
-    return x.status!=="finished"&&x.status!=="cancelled"&&x.is_country_match===true&&new Date(x.start_time)>new Date();
-  }).sort(function(a,b){return new Date(a.start_time)-new Date(b.start_time)});
+  var eligible=state.matches.filter(function(x){ return isPromoCricket(x)&&new Date(x.start_time)>new Date(); }).sort(function(a,b){return new Date(a.start_time)-new Date(b.start_time)});
   var todayRows=eligible.filter(function(x){return localDate(x.start_time)===today}).sort(function(a,b){return (b.promotion_score||0)-(a.promotion_score||0)});
-  var boardRows=todayRows.slice(0,6);
-  var boardFallback=false;
+  var boardRows=todayRows.slice(0,6),boardFallback=false;
   if(!boardRows.length){
     boardRows=eligible.filter(function(x){return next7(x.start_time)}).sort(function(a,b){return (b.promotion_score||0)-(a.promotion_score||0)).slice(0,6);
     boardFallback=true;
   }
   $("hero").innerHTML=boardRows.length?boardRows.map(function(x){
-    var game=x.game||((x.sport==="Esports"&&x.sport_detail)?x.sport_detail:"");
-    return '<div class="hero-card"><span class="sig '+sigClass(x.promotion_signal)+'">'+esc(x.promotion_signal)+'</span><div class="hsport">'+(icon[x.sport]||"•")+' '+esc(x.sport)+(game?' · '+esc(game):"")+'</div><div class="hevent">'+eventName(x)+'</div><div class="hcomp">'+esc(x.tournament_name||x.competition||"Unknown")+'</div><div class="hmeta"><span class="'+(boardFallback?"hero-date":"")+'">📅 '+localDateLabel(x.start_time)+' · '+(x.time_precision==="date_only"?"Time TBD":localTime(x.start_time)+" IST")+'</span><span class="reason">'+esc((x.promotion_reasons||[])[0]||"country fixture")+'</span></div></div>';
-  }).join(""):'<div class="empty-box">No international/country fixtures found in the next 7 days.</div>';
-  $("hero").previousElementSibling.querySelector(".ptitle").textContent=boardFallback?"📌 Next 7 Days · Promotion Board":"🔥 Today's Promotion Board";
-  $("hero").previousElementSibling.querySelector(".psub").textContent=boardFallback?"No eligible country fixtures today — next available international fixtures are shown":"Country / national-team fixtures only";
+    var game=x.game||"";
+    var fm=x.format||"";
+    return '<div class="hero-card"><span class="sig '+sigClass(x.promotion_signal)+'">'+esc(x.promotion_signal)+'</span><div class="hsport">🏏 Cricket'+(fm?' <span class="format-tag">'+esc(fm)+'</span>':"")+'</div><div class="hevent">'+eventName(x)+'</div><div class="hcomp">'+esc(x.tournament_name||x.competition||"Unknown")+'</div><div class="hmeta"><span class="'+(boardFallback?"hero-date":"")+'">📅 '+localDateLabel(x.start_time)+' · '+(x.time_precision==="date_only"?"Time TBD":localTime(x.start_time)+" IST")+'</span><span class="reason">'+esc((x.promotion_reasons||[])[0]||"priority cricket fixture")+'</span></div></div>';
+  }).join(""):'<div class="empty-box">No priority international cricket fixtures are available in the next 7 days.</div>';
+  $("hero").previousElementSibling.querySelector(".ptitle").textContent=boardFallback?"📌 Next 7 Days · Cricket Promotion Board":"🔥 Cricket Promotion Board";
+  $("hero").previousElementSibling.querySelector(".psub").textContent=boardFallback?"No qualifying cricket fixture today — next available priority country fixtures are shown":"Sri Lanka + high-interest international cricket nations only";
   var tc={};state.matches.filter(function(x){return x.status!=="finished"&&x.status!=="cancelled"&&localDate(x.start_time)===today}).forEach(function(x){tc[x.sport]=(tc[x.sport]||0)+1});
   cats("todayCats",tc);
   cats("monthCats",a.sport_month_counts||{});
@@ -135,7 +151,7 @@ function render(){
   $("sourceNote").textContent=state.matches.length.toLocaleString()+" total month inventory · completed fixtures hidden from lists · SofaScore + ESPNcricinfo + Flashscore";
 }
 function populateSports(){
-  var list=[...new Set(state.matches.map(function(x){return x.sport}))].sort();
+  var list=[...new Set(state.matches.map(function(x){return x.sport}))].sort(function(a,b){if(a==="Cricket")return -1;if(b==="Cricket")return 1;return a.localeCompare(b)});
   $("sportFilter").innerHTML='<option>All Sports</option>'+list.map(function(s){return '<option>'+esc(s)+'</option>'}).join("");
 }
 function renderRows(){
