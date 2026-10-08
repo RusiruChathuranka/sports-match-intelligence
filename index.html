@@ -1,21 +1,166 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sports Match Intelligence</title>
-<style>:root{color-scheme:light dark;--bg:light-dark(#f5f7fb,#0b1020);--s:light-dark(#fff,#121a2d);--s2:light-dark(#f0f3f9,#18223a);--t:light-dark(#172033,#f3f6ff);--m:light-dark(#667085,#9aa7c0);--b:light-dark(#e3e7ef,#26334e);--a:light-dark(#5b5ce2,#8d8fff);--g:light-dark(#11a683,#33c9a4)}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}.wrap{max-width:1440px;margin:auto;padding:28px 30px 40px}.top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:24px}.brand{display:flex;gap:13px;align-items:center}.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,var(--a),#9b65f6);display:grid;place-items:center;color:#fff;font-weight:900}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--m);font-weight:800}.title{font-size:27px;font-weight:850}.sub,.note{color:var(--m);font-size:12px}.actions,.filters{display:flex;gap:9px;flex-wrap:wrap}.btn,.select,.search{height:38px;border:1px solid var(--b);background:var(--s);color:var(--t);border-radius:10px;padding:0 13px;font-weight:700}.btn{cursor:pointer}.primary{background:var(--a);border-color:var(--a);color:#fff}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:16px}.card{background:var(--s);border:1px solid var(--b);border-radius:15px}.stat,.panel{padding:18px 19px}.stat-value{font-size:28px;font-weight:850;margin:6px 0 2px}.grid{display:grid;grid-template-columns:1.65fr 1fr;gap:16px;margin-bottom:16px}.head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:15px}.pt{font-weight:850;font-size:15px}.highlights{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.highlight{border:1px solid var(--b);background:var(--s2);border-radius:12px;padding:13px}.tag,.pill{display:inline-flex;border-radius:999px;padding:4px 7px;background:var(--s2);font-size:10px;font-weight:800}.tag{color:var(--a);text-transform:uppercase}.match{font-weight:800;margin:11px 0 7px}.meta{font-size:11px;color:var(--m);display:flex;justify-content:space-between}.chart{height:190px;display:flex;align-items:flex-end;gap:8px;padding:12px 4px 0}.bw{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}.bar{width:100%;max-width:32px;background:linear-gradient(to top,var(--a),#9b65f6);border-radius:6px 6px 2px 2px;min-height:5px}.bl{font-size:9px;color:var(--m)}.bv{font-size:9px;font-weight:800}.search{min-width:220px;flex:1}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:820px}.table th{text-align:left;font-size:10px;text-transform:uppercase;color:var(--m);padding:10px;border-bottom:1px solid var(--b)}.table td{padding:12px 10px;border-bottom:1px solid var(--b);font-size:12px}.sport{font-weight:800}.status{color:var(--g);font-weight:800}.coverage{display:grid;gap:12px}.coverrow{display:grid;grid-template-columns:88px 1fr 38px;align-items:center;gap:10px;font-size:11px}.progress{height:8px;background:var(--s2);border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;background:var(--g)}.footer{margin-top:17px;color:var(--m);font-size:11px;display:flex;justify-content:space-between}@media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}@media(max-width:680px){.wrap{padding:20px 14px}.top{flex-direction:column}.stats{grid-template-columns:1fr 1fr}.highlights{grid-template-columns:1fr}.title{font-size:23px}.search{min-width:160px}.footer{flex-direction:column;gap:5px}}</style></head>
-<body><main class="wrap"><header class="top"><div class="brand"><div class="logo">SI</div><div><div class="eyebrow">Sports Intelligence</div><div class="title">Match Center</div><div class="sub">Live inventory, highlights & source coverage</div></div></div><div class="actions"><button class="btn" id="refresh">↻ Refresh data</button><button class="btn primary" id="export">Export CSV</button></div></header>
-<section class="stats"><div class="card stat"><div class="note">TODAY</div><div class="stat-value" id="today">—</div><div class="note">events</div></div><div class="card stat"><div class="note">TOMORROW</div><div class="stat-value" id="tomorrow">—</div><div class="note">events</div></div><div class="card stat"><div class="note" id="monthLabel">THIS MONTH</div><div class="stat-value" id="month">—</div><div class="note">events</div></div><div class="card stat"><div class="note">NEXT 7 DAYS</div><div class="stat-value" id="week">—</div><div class="note">events</div></div></section>
-<section class="grid"><div class="card panel"><div class="head"><div><div class="pt">🔥 Today's Highlights</div><div class="note">Highest importance events</div></div><span class="pill">Top 3</span></div><div class="highlights" id="highlights"></div></div><div class="card panel"><div class="head"><div><div class="pt">📊 Monthly Volume</div><div class="note">Daily event count</div></div><span class="note" id="chartLabel"></span></div><div class="chart" id="chart"></div></div></section>
-<section class="grid"><div class="card panel"><div class="head"><div><div class="pt">Event Inventory</div><div class="note" id="result"></div></div></div><div class="filters"><input class="search" id="search" placeholder="Search team, player, competition or sport…"><select class="select" id="sport"><option>All Sports</option></select><select class="select" id="competition"><option>All Competitions</option></select><select class="select" id="range"><option value="today">Today</option><option value="next7">Next 7 Days</option><option value="month">Entire Month</option></select></div><div class="table-wrap"><table class="table"><thead><tr><th>Date</th><th>Time</th><th>Sport</th><th>Competition</th><th>Event</th><th>Source</th><th>Status</th></tr></thead><tbody id="rows"></tbody></table></div></div><div class="card panel"><div class="head"><div><div class="pt">🎯 Source Coverage</div><div class="note">Events found by tracked sources</div></div></div><div class="coverage" id="coverage"></div></div></section>
-<section class="card panel"><div class="head"><div><div class="pt">📅 Upcoming Event Volume</div><div class="note">Next 7 days</div></div></div><div class="chart" id="weekChart"></div></section>
-<div class="footer"><span id="sourceNote">Loading…</span><span id="updated">Last updated —</span></div></main>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BETSS Sports Match Intelligence</title>
+<style>
+:root{--bg:#07101d;--panel:#0d1728;--panel2:#111e32;--line:#22354f;--text:#eff6ff;--muted:#8ea2bf;--blue:#5ba7ff;--purple:#7965ff;--good:#4ade80;--warn:#facc15;--radius:18px;--shadow:0 20px 55px rgba(0,0,0,.24)}
+*{box-sizing:border-box}body{margin:0;color:var(--text);background:radial-gradient(circle at 15% 0,#152a48 0,#07101d 43%,#050a13 100%);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select{font:inherit}.app{max-width:1540px;margin:auto;padding:26px 26px 48px}
+.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:22px}.brand{display:flex;gap:14px;align-items:center}.logo{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;color:white;font-weight:950;background:linear-gradient(135deg,#4396ff,#775eff);box-shadow:0 14px 34px rgba(73,111,255,.28)}
+.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.18em;font-weight:900;color:#7fa2cf}.title{font-size:28px;font-weight:950;letter-spacing:-.03em}.subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.btn,.now{height:38px;border:1px solid var(--line);border-radius:11px;background:#0c1728;color:var(--text);padding:0 12px;font-weight:850}.btn{cursor:pointer}.btn.primary{background:linear-gradient(135deg,#4d9dff,#705cff);border-color:transparent}.now{display:flex;align-items:center;gap:7px;color:#b8c9df;font-size:11px}.dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(74,222,128,.10)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:13px}.card{background:linear-gradient(180deg,rgba(17,30,51,.94),rgba(12,22,39,.96));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.kpi{padding:17px 18px;min-height:116px}.label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:900}.value{font-size:34px;font-weight:950;line-height:1;margin:9px 0 5px}.kfoot{font-size:10px;color:#9caec7}
+.layout{display:grid;grid-template-columns:1.65fr 1fr;gap:13px;margin-bottom:13px}.panel{padding:18px}.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:15px}.ptitle{font-size:15px;font-weight:900}.psub{font-size:10px;color:var(--muted);margin-top:2px}.badge{font-size:9px;font-weight:950;padding:6px 9px;border:1px solid #2d4667;background:#12233b;border-radius:999px;color:#bad1ed}
+.hero{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.hero-card{padding:13px;border-radius:14px;background:linear-gradient(180deg,#142844,#0e1b2e);border:1px solid #2a4567}.sig{display:inline-block;padding:4px 7px;border-radius:7px;font-size:9px;font-weight:950;text-transform:uppercase}.sig.promote{background:#6ee7b7;color:#05291d}.sig.consider{background:#fcd34d;color:#392800}.sig.monitor{background:#263a55;color:#dae6f4}.hsport{font-size:9px;color:#7fa6d5;font-weight:900;text-transform:uppercase;margin:10px 0 5px}.hevent{font-size:13px;font-weight:950;line-height:1.25}.hcomp{font-size:10px;color:#9db0c8;margin-top:6px}.hmeta{display:flex;justify-content:space-between;gap:8px;margin-top:11px;padding-top:9px;border-top:1px solid #27415f;color:#b7c9df;font-size:9px}.reason{color:#80a8d6}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cat{padding:10px;border:1px solid #233850;border-radius:12px;background:#0c1729}.cat-top{display:flex;justify-content:space-between;gap:8px}.cat-name{font-size:10px;font-weight:900}.cat-count{font-size:11px;font-weight:950}.track{height:5px;border-radius:99px;background:#17283f;overflow:hidden;margin-top:8px}.fill{height:100%;background:linear-gradient(90deg,#5ba7ff,#7965ff);border-radius:99px}
+.chart{height:142px;display:flex;align-items:flex-end;gap:5px;padding-top:10px;overflow:hidden}.bar-col{height:100%;flex:1;min-width:4px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px}.bar-v{font-size:8px;color:#9bb0cb}.bar{width:100%;max-width:20px;min-height:4px;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,#69b1ff,#6f60ff)}.bar-l{font-size:8px;color:#5e7594}
+.tabs{display:flex;gap:6px}.tab{border:1px solid var(--line);background:#0b1627;color:#9eb1ca;border-radius:9px;padding:8px 11px;font-size:10px;font-weight:900;cursor:pointer}.tab.active{background:#19304c;color:#e2efff;border-color:#3f6794}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}.search,.select{height:38px;border-radius:10px;border:1px solid var(--line);background:#0a1525;color:var(--text);padding:0 11px;outline:none}.search{min-width:250px;flex:1}
+.table-wrap{overflow:auto;border:1px solid #20324b;border-radius:13px}table{width:100%;min-width:1000px;border-collapse:collapse}thead th{padding:10px 11px;background:#091525;color:#6f86a5;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #1f3047}tbody td{padding:11px;border-bottom:1px solid #1b2b41;font-size:11px;vertical-align:top}tbody tr:hover{background:#0e1a2d}
+.date-main{font-weight:900}.date-sub{font-size:9px;color:#6d839e;margin-top:2px}.time{font-weight:950;color:#cae0f7}.tiny{font-size:9px;color:#667e9d}.sport-cell{font-weight:900}.comp{color:#a8b8cc}.event{font-weight:900;color:#eef6ff}.event a{text-decoration:none}.event a:hover{text-decoration:underline}.flags{margin-right:5px}.score{font-weight:950}.why{display:block;max-width:240px;color:#6e86a4;font-size:9px;margin-top:4px}
+.cover{display:grid;grid-template-columns:1fr 1fr;gap:8px}.source{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px;border:1px solid #233852;background:#0b1628;border-radius:11px}.sl{display:flex;gap:7px;align-items:center}.sdot{width:7px;height:7px;border-radius:50%}.ok{background:var(--good)}.warn{background:var(--warn)}.empty{background:#64748b}.sn{font-size:10px;font-weight:900}.sm{font-size:9px;color:#6e839f}.sc{font-size:11px;font-weight:950}.help{padding:13px;border:1px solid #253a55;border-radius:12px;background:#0b1728;color:#8fa5c1;font-size:10px}.help b{color:#e2efff}.footer{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;color:#677d9b;font-size:10px;margin-top:13px}
+.empty-box{padding:26px;text-align:center;color:var(--muted);border:1px dashed #2a4262;border-radius:12px}
+@media(max-width:1120px){.layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.app{padding:15px 11px 30px}.top{flex-direction:column}.top-actions{justify-content:flex-start}.kpis{grid-template-columns:1fr 1fr}.hero{grid-template-columns:1fr}.cat-grid,.cover{grid-template-columns:1fr}.title{font-size:23px}.panel{padding:14px}.search{min-width:170px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="top">
+  <div class="brand"><div class="logo">BI</div><div><div class="eyebrow">BETSS Growth Intelligence</div><div class="title">Sports Match Intelligence</div><div class="subtitle">Sri Lanka market calendar · match-level inventory · promotion prioritization</div></div></div>
+  <div class="top-actions"><span class="now"><span class="dot"></span><span id="now">Loading…</span></span><button class="btn" id="refresh">↻ Refresh</button><button class="btn primary" id="export">Export CSV</button></div>
+</header>
+
+<section class="kpis">
+  <div class="card kpi"><div class="label">Today's matches</div><div class="value" id="kToday">—</div><div class="kfoot">All tracked sports · local day</div></div>
+  <div class="card kpi"><div class="label" id="monthLabel">Current month</div><div class="value" id="kMonth">—</div><div class="kfoot">Individual matches / races</div></div>
+  <div class="card kpi"><div class="label">Next 7 days</div><div class="value" id="kWeek">—</div><div class="kfoot">From current Sri Lanka time</div></div>
+  <div class="card kpi"><div class="label">Today's promotion priorities</div><div class="value" id="kPromote">—</div><div class="kfoot">Events scored <b style="color:#a9c8ee">65+</b></div></div>
+</section>
+
+<section class="layout">
+  <div class="card panel">
+    <div class="head"><div><div class="ptitle">🔥 Today's promotion board</div><div class="psub">Top fixtures by Sri Lanka-market editorial signal</div></div><span class="badge">HEURISTIC · NOT ODDS-BASED</span></div>
+    <div class="hero" id="hero"></div>
+  </div>
+  <div class="card panel">
+    <div class="head"><div><div class="ptitle">📊 Today's category mix</div><div class="psub">Individual match count by sport</div></div></div>
+    <div class="cat-grid" id="todayCats"></div>
+  </div>
+</section>
+
+<section class="layout">
+  <div class="card panel">
+    <div class="head"><div><div class="ptitle">📅 Current-month volume</div><div class="psub">Daily individual match count</div></div><span class="badge" id="monthBadge">—</span></div>
+    <div class="chart" id="monthChart"></div>
+  </div>
+  <div class="card panel">
+    <div class="head"><div><div class="ptitle">🏷️ Monthly categories</div><div class="psub">Inventory by sport</div></div></div>
+    <div class="cat-grid" id="monthCats"></div>
+  </div>
+</section>
+
+<section class="card panel">
+  <div class="head"><div><div class="ptitle">📋 Match inventory</div><div class="psub" id="resultMeta">Loading…</div></div><div class="tabs"><button class="tab active" data-range="today">Today</button><button class="tab" data-range="next7">Next 7 Days</button><button class="tab" data-range="month">Entire Month</button></div></div>
+  <div class="toolbar"><input class="search" id="search" placeholder="Search teams, players, competition or sport…"><select class="select" id="sportFilter"><option>All Sports</option></select><select class="select" id="signalFilter"><option>All Signals</option><option>Promote</option><option>Consider</option><option>Monitor</option></select></div>
+  <div class="table-wrap"><table><thead><tr><th>Date</th><th>Time · IST</th><th>Sport</th><th>Competition</th><th>Match / Event</th><th>Signal</th><th>Score</th></tr></thead><tbody id="rows"></tbody></table></div>
+</section>
+
+<section class="layout" style="margin-top:13px">
+  <div class="card panel"><div class="head"><div><div class="ptitle">🛰️ Source health</div><div class="psub">Current-month coverage status</div></div></div><div class="cover" id="coverage"></div></div>
+  <div class="card panel"><div class="head"><div><div class="ptitle">🧭 Signal logic</div><div class="psub">What the promotion score means</div></div></div><div class="help"><b>Promote</b> = strongest candidate for homepage, banner or push planning.<br><br><b>Consider</b> = useful secondary opportunity.<br><br><b>Monitor</b> = lower-priority fixture.<br><br>The score uses sport priority, marquee competition, international status, recognizable teams, Sri Lanka involvement and local-time fit. It does <b>not</b> use bookmaker odds and does not guarantee conversion.</div></div>
+</section>
+
+<footer class="footer"><span id="sourceNote">Loading data…</span><span id="updated">Last refresh —</span></footer>
+</main>
+
 <script>
-var fallback=[{sport:"Cricket",competition:"T20 International",event_name:"India vs Australia",start_time:"2026-10-02T10:30:00+05:30",status:"upcoming",source:"Demo",importance:10},{sport:"Football",competition:"Premier League",event_name:"Arsenal vs Chelsea",start_time:"2026-10-02T15:30:00+05:30",status:"upcoming",source:"Demo",importance:10},{sport:"Tennis",competition:"Shanghai Masters",event_name:"Carlos Alcaraz vs Alexander Zverev",start_time:"2026-10-02T13:00:00+05:30",status:"upcoming",source:"Demo",importance:9},{sport:"Rugby",competition:"International",event_name:"England vs South Africa",start_time:"2026-10-02T21:30:00+05:30",status:"upcoming",source:"Demo",importance:8}];
-var matches=[],today=new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Colombo"}),$=function(id){return document.getElementById(id)},d=function(x){return x.start_time.slice(0,10)},dt=function(x){return new Date(x.start_time)};
-function tomorrowDate(){return new Date(Date.now()+86400000).toLocaleDateString("en-CA",{timeZone:"Asia/Colombo"})}
-function initFilters(){var s=[...new Set(matches.map(function(x){return x.sport}).filter(Boolean))].sort(),c=[...new Set(matches.map(function(x){return x.competition}).filter(Boolean))].sort();s.forEach(function(x){$("sport").insertAdjacentHTML("beforeend","<option>"+x+"</option>")});c.forEach(function(x){$("competition").insertAdjacentHTML("beforeend","<option>"+x+"</option>")})}
-function render(){var t=matches.filter(function(x){return d(x)==today}),m=matches.filter(function(x){return d(x).slice(0,7)==today.slice(0,7)}),w=matches.filter(function(x){return dt(x)>=new Date()&&dt(x)<new Date(Date.now()+604800000)});$("today").textContent=t.length;$("tomorrow").textContent=matches.filter(function(x){return d(x)==tomorrowDate()}).length;$("month").textContent=m.length;$("week").textContent=w.length;$("monthLabel").textContent=new Date().toLocaleDateString("en-US",{month:"long",year:"numeric"}).toUpperCase();$("chartLabel").textContent=new Date().toLocaleDateString("en-US",{month:"long",year:"numeric"});high(t);rows();bars(m,$("chart"),false);bars(w,$("weekChart"),true);coverage();$("updated").textContent="Last updated "+new Date().toLocaleString("en-GB",{timeZone:"Asia/Colombo",hour:"2-digit",minute:"2-digit",day:"2-digit",month:"short"})}
-function high(a){a=(a.length?a:matches).sort(function(x,y){return (y.importance||0)-(x.importance||0)}).slice(0,3);$("highlights").innerHTML=a.map(function(x){return '<div class="highlight"><span class="tag">'+x.sport+'</span><div class="match">'+x.event_name+'</div><div class="meta"><span>'+x.competition+' · '+dt(x).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})+'</span><span>★★★★★</span></div></div>'}).join("")}
-function rows(){var q=$("search").value.toLowerCase(),s=$("sport").value,c=$("competition").value,r=$("range").value,now=new Date(),end7=new Date(now.getTime()+604800000),a=matches.filter(function(x){var inRange=r=="month"?(d(x).slice(0,7)==today.slice(0,7)):r=="next7"?(dt(x)>=now&&dt(x)<end7):d(x)==today;return inRange}).filter(function(x){return s=="All Sports"||x.sport==s}).filter(function(x){return c=="All Competitions"||x.competition==c}).filter(function(x){return JSON.stringify(x).toLowerCase().includes(q)}).sort(function(a,b){return dt(a)-dt(b)});$("rows").innerHTML=a.map(function(x){return '<tr><td><b>'+new Date(d(x)+"T00:00:00").toLocaleDateString("en-GB",{day:"2-digit",month:"short"})+'</b></td><td><b>'+(x.time_precision==="date_only"?"Time TBD":dt(x).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}))+'</b></td><td class="sport">'+x.sport+'</td><td>'+x.competition+'</td><td><b>'+x.event_name+'</b></td><td><span class="pill">'+(x.source||"—")+'</span></td><td class="status">'+(x.status||"upcoming")+'</td></tr>'}).join("")||'<tr><td colspan="7" style="text-align:center;color:var(--m);padding:28px">No events found</td></tr>';$("result").textContent="Showing "+a.length+" events"}
-function bars(a,target,short){var map={};a.forEach(function(x){var k=d(x);map[k]=(map[k]||0)+1});var v=Object.keys(map).sort().map(function(k){return {k:k,v:map[k]}}),max=Math.max(1,...v.map(function(x){return x.v}));target.innerHTML=v.map(function(x){var label=short?new Date(x.k+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}):x.k.slice(8);return '<div class="bw"><div class="bv">'+x.v+'</div><div class="bar" style="height:'+Math.max(5,x.v/max*145)+'px"></div><div class="bl">'+label+'</div></div>'}).join("")}
-function coverage(){var m={};matches.forEach(function(x){m[x.sport]=(m[x.sport]||0)+1});var a=Object.entries(m).sort(function(a,b){return b[1]-a[1]}),max=Math.max(1,...a.map(function(x){return x[1]}));$("coverage").innerHTML=a.map(function(x){return '<div class="coverrow"><b>'+x[0]+'</b><div class="progress"><i style="width:'+x[1]/max*100+'%"></i></div><b>'+x[1]+'</b></div>'}).join("")||'<span class="note">No source data yet.</span>'}
-async function load(){try{var r=await fetch("data/matches.json?ts="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;var j=await r.json();matches=Array.isArray(j)?j:(j.matches||[]);$("sourceNote").textContent="Live normalized data from ESPNcricinfo / Sky Sports / SofaScore calendar feeds"}catch(e){matches=fallback;$("sourceNote").textContent="Demo data — run the GitHub Actions scraper to load live calendar data"}document.querySelectorAll("#sport option:not(:first-child),#competition option:not(:first-child)").forEach(function(o){o.remove()});initFilters();render()}
-$("search").addEventListener("input",rows);$("sport").addEventListener("change",rows);$("competition").addEventListener("change",rows);$("range").addEventListener("change",rows);$("refresh").addEventListener("click",load);$("export").addEventListener("click",function(){var csv=["event_id,sport,competition,event_name,start_time,status,event_type,source,source_url"].concat(matches.map(function(x){return [x.event_id,x.sport,x.competition,x.event_name,x.start_time,x.status,x.event_type,x.source,x.source_url].map(function(v){return JSON.stringify(v||"")}).join(",")})).join("\\n");var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="sports_matches.csv";a.click()});load();
-</script></body></html>
+var TZ="Asia/Colombo",state={matches:[],data:null,range:"today"},$=function(id){return document.getElementById(id)};
+var icon={Cricket:"🏏",Soccer:"⚽",Tennis:"🎾",Basketball:"🏀",Rugby:"🏉","Formula 1":"🏎️",Esports:"🎮",Boxing:"🥊",Badminton:"🏸",Volleyball:"🏐","Horse Racing":"🏇"};
+
+function esc(s){return String(s||"").replace(/[&<>"']/g,function(m){return({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"})[m]})}
+function dateKey(){return new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
+function localDate(iso){return new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(iso))}
+function localDateLabel(iso){return new Intl.DateTimeFormat("en-GB",{timeZone:TZ,day:"2-digit",month:"short"}).format(new Date(iso))}
+function localDay(iso){return new Intl.DateTimeFormat("en-GB",{timeZone:TZ,weekday:"short"}).format(new Date(iso))}
+function localTime(iso){return new Intl.DateTimeFormat("en-GB",{timeZone:TZ,hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(iso))}
+function nowText(){return new Intl.DateTimeFormat("en-GB",{timeZone:TZ,weekday:"short",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date())}
+function next7(iso){var n=Date.now(),t=new Date(iso).getTime();return t>=n&&t<n+604800000}
+function flag(code){if(!code||code.length!==2)return"";return String.fromCodePoint.apply(null,code.toUpperCase().split("").map(function(c){return 127397+c.charCodeAt(0)}))}
+function eventName(x){
+  if(x.international&&x.participant_1&&x.participant_2){
+    return '<span class="flags">'+flag(x.participant_1_country_code)+flag(x.participant_2_country_code)+'</span>'+esc(x.participant_1)+' <span style="color:#6d819c">vs</span> '+esc(x.participant_2);
+  }
+  return esc(x.event_name||((x.participant_1||"")+" vs "+(x.participant_2||"")));
+}
+function sigClass(x){return String(x||"Monitor").toLowerCase()}
+function cats(el,counts){
+  var arr=Object.entries(counts||{}).sort(function(a,b){return b[1]-a[1]}),max=Math.max.apply(null,[1].concat(arr.map(function(x){return x[1]})));
+  $(el).innerHTML=arr.length?arr.map(function(x){return '<div class="cat"><div class="cat-top"><div class="cat-name">'+(icon[x[0]]||"•")+' '+esc(x[0])+'</div><div class="cat-count">'+x[1]+'</div></div><div class="track"><div class="fill" style="width:'+Math.max(2,x[1]/max*100)+'%"></div></div></div>'}).join(""):'<div class="empty-box">No data.</div>';
+}
+function render(){
+  var today=dateKey(),a=state.data&&state.data.analytics?state.data.analytics:{},month=state.data?state.data.target_month:today.slice(0,7);
+  $("now").textContent=nowText()+" · IST / SL";
+  $("kToday").textContent=a.today_match_count!=null?a.today_match_count:state.matches.filter(function(x){return localDate(x.start_time)===today}).length;
+  $("kMonth").textContent=a.month_match_count!=null?a.month_match_count:state.matches.length;
+  $("kWeek").textContent=state.matches.filter(function(x){return next7(x.start_time)}).length;
+  $("kPromote").textContent=state.matches.filter(function(x){return localDate(x.start_time)===today&&x.promotion_signal==="Promote"}).length;
+  var md=new Date(month+"-01T00:00:00Z");
+  $("monthLabel").textContent=new Intl.DateTimeFormat("en-US",{month:"long",year:"numeric"}).format(md);
+  $("monthBadge").textContent=(a.month_match_count||state.matches.length)+" matches";
+  var todayRows=state.matches.filter(function(x){return localDate(x.start_time)===today}).sort(function(a,b){return (b.promotion_score||0)-(a.promotion_score||0)});
+  $("hero").innerHTML=todayRows.length?todayRows.slice(0,6).map(function(x){
+    return '<div class="hero-card"><span class="sig '+sigClass(x.promotion_signal)+'">'+esc(x.promotion_signal)+'</span><div class="hsport">'+(icon[x.sport]||"•")+' '+esc(x.sport)+'</div><div class="hevent">'+eventName(x)+'</div><div class="hcomp">'+esc(x.competition)+'</div><div class="hmeta"><span>⏱ '+(x.time_precision==="date_only"?"TBD":localTime(x.start_time)+" IST")+'</span><span class="reason">'+esc((x.promotion_reasons||[])[0]||"inventory")+'</span></div></div>';
+  }).join(""):'<div class="empty-box">No fixtures found for today.</div>';
+  var tc={};todayRows.forEach(function(x){tc[x.sport]=(tc[x.sport]||0)+1});
+  cats("todayCats",tc);
+  cats("monthCats",a.sport_month_counts||{});
+  var dc=a.daily_counts||{},days=Object.keys(dc).sort(),max=Math.max.apply(null,[1].concat(days.map(function(d){return dc[d]})));
+  $("monthChart").innerHTML=days.length?days.map(function(d){return '<div class="bar-col"><div class="bar-v">'+dc[d]+'</div><div class="bar" style="height:'+Math.max(4,dc[d]/max*105)+'px"></div><div class="bar-l">'+d.slice(8)+'</div></div>'}).join(""):'<div class="empty-box">No volume data.</div>';
+  renderRows();renderCoverage();
+  $("updated").textContent="Last refresh "+(state.data&&state.data.generated_at_local?new Intl.DateTimeFormat("en-GB",{timeZone:TZ,dateStyle:"medium",timeStyle:"short"}).format(new Date(state.data.generated_at_local)):"—");
+  $("sourceNote").textContent=state.matches.length.toLocaleString()+" normalized events · 1 row = 1 match/race · SofaScore + ESPNcricinfo + Sky Sports Racing";
+}
+function populateSports(){
+  var list=[...new Set(state.matches.map(function(x){return x.sport}))].sort();
+  $("sportFilter").innerHTML='<option>All Sports</option>'+list.map(function(s){return '<option>'+esc(s)+'</option>'}).join("");
+}
+function renderRows(){
+  var q=$("search").value.toLowerCase(),sf=$("sportFilter").value,sg=$("signalFilter").value,today=dateKey(),month=today.slice(0,7);
+  var rows=state.matches.filter(function(x){
+    var d=localDate(x.start_time),rangeOk=state.range==="today"?d===today:state.range==="next7"?next7(x.start_time):d.slice(0,7)===month;
+    return rangeOk&&(sf==="All Sports"||x.sport===sf)&&(sg==="All Signals"||x.promotion_signal===sg)&&JSON.stringify(x).toLowerCase().indexOf(q)>=0;
+  }).sort(function(a,b){return new Date(a.start_time)-new Date(b.start_time)});
+  $("resultMeta").textContent="Showing "+rows.length.toLocaleString()+" individual matches · "+(state.range==="today"?"today":state.range==="next7"?"next 7 days":"entire current month");
+  $("rows").innerHTML=rows.length?rows.map(function(x){
+    var u=x.source_url?'<a href="'+esc(x.source_url)+'" target="_blank" rel="noreferrer">'+eventName(x)+'</a>':eventName(x);
+    return '<tr><td><div class="date-main">'+localDateLabel(x.start_time)+'</div><div class="date-sub">'+localDay(x.start_time)+'</div></td><td><div class="time">'+(x.time_precision==="date_only"?"TBD":localTime(x.start_time))+'</div><div class="tiny">IST / SL</div></td><td><div class="sport-cell">'+(icon[x.sport]||"•")+' '+esc(x.sport)+'</div>'+((x.sport==="Esports"&&x.sport_detail)?'<div class="tiny">'+esc(x.sport_detail)+'</div>':'')+'</td><td><div class="comp">'+esc(x.competition)+'</div></td><td><div class="event">'+u+'</div></td><td><span class="sig '+sigClass(x.promotion_signal)+'">'+esc(x.promotion_signal)+'</span></td><td><div class="score">'+Math.round(Number(x.promotion_score||0))+'/100</div><span class="why">'+esc((x.promotion_reasons||[]).slice(0,3).join(" · ")||"general inventory")+'</span></td></tr>';
+  }).join(""):'<tr><td colspan="7"><div class="empty-box">No matches match the current filters.</div></td></tr>';
+}
+function renderCoverage(){
+  var h=state.data&&state.data.provider_health?state.data.provider_health:{};
+  $("coverage").innerHTML=Object.keys(icon).map(function(s){
+    var x=h[s]||{status:"empty",count:0,provider:"—"},cl=x.status==="ok"?"ok":x.status==="warning"?"warn":"empty";
+    return '<div class="source"><div class="sl"><span class="sdot '+cl+'"></span><div><div class="sn">'+(icon[s]||"•")+' '+esc(s)+'</div><div class="sm">'+esc(x.provider||"—")+'</div></div></div><div class="sc">'+Number(x.count||0).toLocaleString()+'</div></div>';
+  }).join("");
+}
+async function load(){
+  try{
+    var r=await fetch("data/matches.json?ts="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("missing");
+    state.data=await r.json();state.matches=Array.isArray(state.data)?state.data:(state.data.matches||[]);populateSports();render();
+  }catch(e){
+    state.data=null;state.matches=[];$("sourceNote").textContent="Data file unavailable. Run the GitHub Actions workflow once to populate live inventory.";renderRows();renderCoverage();
+  }
+}
+$("refresh").addEventListener("click",load);
+$("export").addEventListener("click",function(){
+  var f=["event_id","sport","competition","event_name","participant_1","participant_2","start_time","status","promotion_signal","promotion_score","source","source_url"];
+  var csv=[f.join(",")].concat(state.matches.map(function(x){return f.map(function(k){return JSON.stringify(x[k]||"")}).join(",")})).join("\n");
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="betss-sports-match-intelligence.csv";a.click();
+});
+document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});b.classList.add("active");state.range=b.getAttribute("data-range");renderRows()})});
+$("search").addEventListener("input",renderRows);$("sportFilter").addEventListener("change",renderRows);$("signalFilter").addEventListener("change",renderRows);
+setInterval(function(){$("now").textContent=nowText()+" · IST / SL"},1000);
+load();
+</script>
+</body></html>
