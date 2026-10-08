@@ -31,6 +31,26 @@ SPORTS = {
 }
 SPORT_ORDER = ["Cricket","Soccer","Tennis","Basketball","Rugby","Formula 1","Esports","Boxing","Badminton","Volleyball","Horse Racing"]
 
+# Flashscore public feed sport IDs. The feed provides match-level rows rather than
+# tournament/series totals, which is exactly what the dashboard needs.
+FLASHSCORE_SPORTS = {
+    1: "Soccer",
+    2: "Tennis",
+    3: "Basketball",
+    8: "Rugby",
+    12: "Volleyball",
+    13: "Cricket",
+    16: "Boxing",
+    21: "Badminton",
+    31: "Formula 1",
+    35: "Horse Racing",
+    36: "Esports",
+}
+FLASH_HOST = "https://local-global.flashscore.ninja"
+FLASH_PROJECT = "2"
+FLASH_LOCALE = "en"
+FLASH_SIGNATURE = "SW9D1eZo"
+
 SOFA_URLS = {
     "Soccer": "https://www.sofascore.com/football",
     "Cricket": "https://www.sofascore.com/cricket",
@@ -169,6 +189,106 @@ def participant_meta(obj):
     if not national and normalize(team_name) in COUNTRY_CODES:
         national = True
     return {"name": team_name, "country_code": code if national else "", "is_national": national}
+
+
+def flashscore_status(raw):
+    try:
+        code = int(str(raw or "").split(":")[0])
+    except Exception:
+        code = 1
+    return {1:"upcoming",2:"live",3:"finished",4:"cancelled"}.get(code, "upcoming")
+
+def parse_flashscore_feed(text_body, sport):
+    # Flashscore feed blocks are separated by "~", fields by "¬" and key/value
+    # pairs by "÷". Tournament metadata is carried forward to subsequent match rows.
+    current_comp = "Scheduled"
+    rows = []
+    for block in (text_body or "").split("~"):
+        fields = {}
+        for item in block.split("¬"):
+            if "÷" not in item:
+                continue
+            key, value = item.split("÷", 1)
+            if key:
+                fields[key] = value
+        if fields.get("ZA") or fields.get("ZB") or fields.get("AC"):
+            current_comp = clean(fields.get("ZA") or fields.get("ZB") or fields.get("AC") or current_comp)
+        if "AA" not in fields or "AD" not in fields:
+            continue
+
+        start = iso_from_epoch(fields.get("AD"))
+        if not start:
+            continue
+        comp = clean(fields.get("ZA") or fields.get("AC") or current_comp or "Scheduled")
+        p1 = clean(fields.get("AE"))
+        p2 = clean(fields.get("AF"))
+        raw_name = clean(fields.get("CX") or fields.get("AN") or fields.get("AC"))
+        if p1 and p2:
+            event_name = f"{p1} vs {p2}"
+        else:
+            event_name = raw_name or p1 or p2 or comp
+
+        # Formula 1: count races/sprints only, not practice or qualifying sessions.
+        if sport == "Formula 1":
+            hay = f"{comp} {event_name}".lower()
+            if "formula 1" not in hay and not re.search(r"\bf1\b", hay):
+                continue
+            if any(k in hay for k in ["practice", "qualifying", "free practice", "fp1", "fp2", "fp3"]):
+                continue
+            event_type = "sprint" if "sprint" in hay else "race"
+
+        # Horse racing is already represented at race level in this feed.
+        elif sport == "Horse Racing":
+            event_type = "race"
+        else:
+            event_type = "match"
+
+        p1_meta = {"name": p1, "country_code": alpha2_for_name(p1), "is_national": bool(alpha2_for_name(p1))}
+        p2_meta = {"name": p2, "country_code": alpha2_for_name(p2), "is_national": bool(alpha2_for_name(p2))}
+        importance = 7
+        if sport == "Cricket":
+            importance = 9
+        elif sport == "Soccer":
+            importance = 8
+        elif sport == "Tennis":
+            importance = 7
+
+        x = make_event(
+            sport, comp, event_name, start, flashscore_status(fields.get("AB")),
+            event_type, "Flashscore", f"https://www.flashscore.com/match/{fields.get('AA')}/",
+            p1, p2, p1_meta, p2_meta, importance
+        )
+        if x:
+            x["provider_event_id"] = fields.get("AA")
+            x["home_score"] = clean(fields.get("AG"))
+            x["away_score"] = clean(fields.get("AH"))
+            x["sport_detail"] = sport
+            rows.append(x)
+    return rows
+
+def flashscore_events(sport_id, day_offset, target_month):
+    sport = FLASHSCORE_SPORTS[sport_id]
+    url = f"{FLASH_HOST}/{FLASH_PROJECT}/x/feed/f_{sport_id}_{day_offset}_3_{FLASH_LOCALE}_1"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/154 Safari/537.36",
+        "Accept": "*/*",
+        "Accept-Language": "en",
+        "Referer": "https://www.flashscore.com/",
+        "Origin": "https://www.flashscore.com",
+        "x-fsign": FLASH_SIGNATURE,
+    }
+    try:
+        if curl_requests:
+            with curl_requests.Session(impersonate="chrome", headers=headers) as s:
+                r = s.get(url, timeout=30)
+        else:
+            r = requests.get(url, headers=headers, timeout=30)
+        r.raise_for_status()
+        rows = parse_flashscore_feed(r.text, sport)
+    except Exception as ex:
+        return sport, [], f"{type(ex).__name__}: {ex}"
+    rows = [x for x in rows if x["start_time"][:7] == target_month]
+    return sport, rows, None
 
 def competition_weight(comp):
     n = normalize(comp)
@@ -344,44 +464,9 @@ FIRECRAWL_SCHEMA = {
 }
 
 def horse_racing_firecrawl(day):
-    api_key = os.getenv("FIRECRAWL_API_KEY")
-    if not api_key: return []
-    url = f"https://www.skysports.com/racing/racecards/{datetime.strptime(day,'%Y-%m-%d').strftime('%d-%m-%Y')}"
-    prompt = (
-        "Extract every individual horse race shown on this racecards page. One JSON item per race. "
-        "Do not return meetings or racecards as a single item. Include the displayed local time, venue, "
-        "full race name, and status when available. Preserve race time exactly; do not invent times."
-    )
-    try:
-        r = requests.post(
-            "https://api.firecrawl.dev/v2/scrape",
-            headers={"Authorization":f"Bearer {api_key}","Content-Type":"application/json"},
-            json={"url":url,"formats":[{"type":"json","schema":FIRECRAWL_SCHEMA,"prompt":prompt}],"onlyMainContent":True},
-            timeout=90,
-        )
-        r.raise_for_status()
-        payload = r.json()
-        data = payload.get("data",{}).get("json") or payload.get("json") or {}
-        out=[]
-        for race in data.get("races",[]):
-            tm = clean(race.get("time"))
-            venue = clean(race.get("venue"))
-            race_name = clean(race.get("race_name"))
-            if not tm or not venue or not race_name: continue
-            m = re.search(r"(\d{1,2}):(\d{2})", tm)
-            if not m: continue
-            hh, mm = int(m.group(1)), int(m.group(2))
-            # Sky Sports racecards display UK/local venue time. Use a conservative timestamp
-            # conversion to an absolute time for the Sri Lankan dashboard.
-            dt_local = datetime.strptime(f"{day} {hh:02d}:{mm:02d}", "%Y-%m-%d %H:%M").replace(tzinfo=ZoneInfo("Europe/London"))
-            start = dt_local.astimezone(LOCAL_TZ).isoformat()
-            status = status_name(race.get("status"))
-            out.append(make_event("Horse Racing", venue, f"{venue} — {race_name}", start, status,
-                                  "race", "Sky Sports Racing", url, "", "", {}, {}, 5))
-        return [x for x in out if x]
-    except Exception as ex:
-        print("Horse racing Firecrawl failed", day, ex)
-        return []
+    # Retained for compatibility with older imports. Horse racing is now collected
+    # directly from the Flashscore public feed (sport ID 35).
+    return []
 
 def promotion_score(x):
     sport = x["sport"]
@@ -441,34 +526,63 @@ def build_analytics(matches, target_month):
     }
 
 def main():
+    current_day = datetime.now(LOCAL_TZ).date()
     days = month_dates(TARGET_MONTH)
+    day_to_date = {i - 7: current_day + timedelta(days=i - 7) for i in range(15)}
     out = []
-    health = {s: {"provider":"SofaScore","status":"pending","count":0,"error":None} for s in SPORT_ORDER}
-    health["Cricket"]["provider"] = "ESPNcricinfo + SofaScore"
-    health["Horse Racing"] = {"provider":"Sky Sports Racing + Firecrawl","status":"pending","count":0,"error":None}
+    health = {s: {"provider":"Flashscore","status":"pending","count":0,"error":None} for s in SPORT_ORDER}
+    health["Cricket"]["provider"] = "Flashscore + ESPNcricinfo"
 
-    with ThreadPoolExecutor(max_workers=16) as pool:
-        future_map = {pool.submit(cricinfo_matches,d):("Cricket","ESPNcricinfo",d) for d in days}
-        future_map.update({pool.submit(horse_racing_firecrawl,d):("Horse Racing","Sky Sports Racing",d) for d in days})
-        for slug in SPORTS:
-            label = SPORTS[slug]
-            for d in days:
-                future_map[pool.submit(sofascore_events,slug,d)] = (label,"SofaScore",d)
+    # Flashscore exposes a rolling -7..+7 day window. We still iterate across the
+    # full target month so the inventory expands automatically as each date enters
+    # the provider's available window.
+    futures_spec = []
+    for offset, d in day_to_date.items():
+        if d.isoformat()[:7] != TARGET_MONTH:
+            continue
+        for sport_id in FLASHSCORE_SPORTS:
+            futures_spec.append((sport_id, offset))
 
-        for f in as_completed(future_map):
-            sport, provider, day = future_map[f]
+    with ThreadPoolExecutor(max_workers=20) as pool:
+        futures = {pool.submit(flashscore_events, sport_id, offset, TARGET_MONTH):(sport_id,offset) for sport_id,offset in futures_spec}
+        for f in as_completed(futures):
+            sport_id, offset = futures[f]
+            sport, rows, err = f.result()
+            if err:
+                health[sport]["error"] = err[:200]
+                if health[sport]["status"] == "pending":
+                    health[sport]["status"] = "warning"
+            else:
+                out.extend(rows)
+                health[sport]["count"] += len(rows)
+
+    # Keep ESPNcricinfo as a second source for cricket. It often exposes longer
+    # international schedules than a rolling daily feed.
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        futures = {pool.submit(cricinfo_matches, d): d for d in days}
+        for f in as_completed(futures):
             try:
                 rows = f.result()
                 out.extend(rows)
-                if rows:
-                    health[sport]["count"] += len(rows)
-                elif health[sport]["status"] == "pending":
-                    health[sport]["status"] = "ok"
+                health["Cricket"]["count"] += len(rows)
             except Exception as ex:
-                health[sport]["error"] = str(ex)[:200]
-                health[sport]["status"] = "warning"
-    
-    # Each fetched row contributes to coverage; zero-count sports remain visible so gaps are obvious.
+                health["Cricket"]["error"] = str(ex)[:200]
+
+    # De-duplicate cross-provider copies. Prefer ESPNcricinfo for cricket and
+    # Flashscore for other sports.
+    priority = {"ESPNcricinfo":0, "Flashscore":1, "SofaScore":2}
+    dedup = {}
+    for x in out:
+        key = x["event_id"]
+        if key not in dedup or priority.get(x["source"],9) < priority.get(dedup[key]["source"],9):
+            dedup[key] = x
+
+    matches = [promotion_score(x) for x in dedup.values()]
+    matches = sorted(matches, key=lambda z:z["start_time"])
+    if not matches:
+        raise RuntimeError("No sports events collected. Check Flashscore source availability.")
+
+    # Mark sports with no events separately so gaps in the source are visible in the UI.
     for sport in SPORT_ORDER:
         if health[sport]["count"] > 0:
             health[sport]["status"] = "ok"
@@ -477,49 +591,43 @@ def main():
         else:
             health[sport]["status"] = "empty"
 
-    # Dedup providers without losing source provenance.
-    dedup={}
-    priority={"ESPNcricinfo":0,"Sky Sports Racing":1,"SofaScore":2}
-    for x in out:
-        key=x["event_id"]
-        if key not in dedup:
-            dedup[key]=x
-        else:
-            incumbent=dedup[key]
-            if priority.get(x["source"],9) < priority.get(incumbent["source"],9):
-                dedup[key]=x
+    analytics = build_analytics(matches, TARGET_MONTH)
+    today_offset_window_start = max(days[0], (current_day - timedelta(days=7)).isoformat())
+    today_offset_window_end = min(days[-1], (current_day + timedelta(days=7)).isoformat())
+    analytics["coverage_note"] = (
+        f"Flashscore daily feeds currently expose a rolling ~15-day window "
+        f"({today_offset_window_start} to {today_offset_window_end}). "
+        f"The current-month inventory therefore grows as future dates enter that window."
+    )
+    analytics["provider_window_start"] = today_offset_window_start
+    analytics["provider_window_end"] = today_offset_window_end
 
-    matches=[promotion_score(x) for x in dedup.values()]
-    matches=sorted(matches,key=lambda z:z["start_time"])
-    if not matches:
-        raise RuntimeError("No sports events collected. Check provider availability and FIRECRAWL_API_KEY.")
-
-    payload={
-        "generated_at":datetime.now(timezone.utc).isoformat(),
-        "generated_at_local":datetime.now(LOCAL_TZ).isoformat(),
-        "timezone":"Asia/Colombo",
-        "timezone_label":"Sri Lanka Time / IST-style UTC+5:30",
-        "target_month":TARGET_MONTH,
-        "event_count":len(matches),
-        "count_definition":"One row = one scheduled match/race. Series/tournaments are never counted as matches.",
-        "sports":SPORT_ORDER,
-        "provider_health":health,
-        "analytics":build_analytics(matches,TARGET_MONTH),
-        "matches":matches,
-        "sources":{
-            "ESPNcricinfo":CRICKET_SOURCE,
-            "SofaScore":"https://www.sofascore.com/",
-            "Sky Sports Racing":"https://www.skysports.com/racing",
-            "Sky Sports schedules":"https://www.skysports.com/",
+    payload = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at_local": datetime.now(LOCAL_TZ).isoformat(),
+        "timezone": "Asia/Colombo",
+        "timezone_label": "Sri Lanka Time / IST-style UTC+5:30",
+        "target_month": TARGET_MONTH,
+        "event_count": len(matches),
+        "count_definition": "One row = one scheduled match/race. Series and tournaments are never counted as matches.",
+        "sports": SPORT_ORDER,
+        "provider_health": health,
+        "analytics": analytics,
+        "matches": matches,
+        "sources": {
+            "Flashscore": "https://www.flashscore.com/live-scores/",
+            "ESPNcricinfo": CRICKET_SOURCE,
+            "Sky Sports Racing": "https://www.skysports.com/racing",
         },
     }
     OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(json.dumps(payload,ensure_ascii=False,indent=2),encoding="utf-8")
-    print("Target month:",TARGET_MONTH)
-    print("Normalized events:",len(matches))
-    print("Today:",payload["analytics"]["today_match_count"])
+    OUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    print("Target month:", TARGET_MONTH)
+    print("Normalized events:", len(matches))
+    print("Today:", analytics["today_match_count"])
     for sport in SPORT_ORDER:
-        print(sport,payload["analytics"]["sport_month_counts"].get(sport,0))
+        print(sport, analytics["sport_month_counts"].get(sport,0))
+
 
 if __name__ == "__main__":
     main()
