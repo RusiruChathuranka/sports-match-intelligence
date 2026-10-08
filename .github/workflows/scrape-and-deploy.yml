@@ -36,8 +36,6 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Build current-month sports inventory
-        env:
-          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: python scraper/scraper.py
 
       - name: Setup Pages
