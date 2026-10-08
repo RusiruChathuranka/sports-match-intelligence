@@ -5,6 +5,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import requests
+from bs4 import BeautifulSoup
 
 try:
     from curl_cffi import requests as curl_requests
@@ -299,7 +300,9 @@ def parse_flashscore_feed(text_body, sport):
             x["home_score"] = clean(fields.get("AG"))
             x["away_score"] = clean(fields.get("AH"))
             x["sport_detail"] = esports_game_name(comp, event_name) if sport == "Esports" else ""
-            x["game"] = x["sport_detail"] if sport == "Esports" else ""
+            x["game"] = (x["sport_detail"] if sport == "Esports" else cricket_format(comp, event_name)) if sport in ("Esports","Cricket") else ""
+            if sport == "Cricket":
+                x["format"] = x["game"]
             x["tournament_name"] = comp
             x["competition_country_code"] = competition_country or None
             x["is_country_match"] = bool(x.get("international"))
@@ -464,6 +467,89 @@ def sofascore_events(slug, day):
                 out.append(x)
     return out
 
+CRICKET_PROMO_COUNTRIES = [
+    "Sri Lanka","India","Pakistan","England","Australia","South Africa",
+    "New Zealand","Bangladesh","West Indies","Afghanistan"
+]
+
+def cricket_format(competition, event_name="", raw=None):
+    hay = normalize(f"{competition} {event_name} {raw or ''}")
+    if "test" in hay or "first class" in hay or "four day" in hay:
+        return "Test"
+    if "odi" in hay or "one day" in hay or "one-day" in hay or "50 over" in hay:
+        return "ODI"
+    if "t20" in hay or "twenty20" in hay or "twenty 20" in hay or "t20i" in hay:
+        return "T20"
+    return ""
+
+def preferred_cricket_country(name):
+    n = normalize(name)
+    return any(normalize(c) in n for c in CRICKET_PROMO_COUNTRIES)
+
+def parse_cricschedule_month(month):
+    y, m = map(int, month.split("-"))
+    month_name = datetime(y, m, 1).strftime("%B").lower()
+    url = f"https://www.cricschedule.com/month/{month_name}-{y}.php"
+    try:
+        r = requests.get(url, headers={"User-Agent":"Mozilla/5.0 Chrome/154 Safari/537.36"}, timeout=35)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, "html.parser")
+    except Exception:
+        return []
+
+    rows = []
+    for tr in soup.select("tr"):
+        cells = [clean(td.get_text(" ", strip=True)) for td in tr.find_all(["td","th"])]
+        if len(cells) < 2:
+            continue
+        row = " | ".join(cells)
+        dm = re.search(r"(Oct\s+\d{1,2},?\s+2026|2026-10-(\d{2}))", row, re.I)
+        if not dm:
+            continue
+        date_text = dm.group(1)
+        day_num = int(date_text[-2:]) if date_text.startswith("2026-10-") else int(re.search(r"(\d{1,2})", date_text).group(1))
+        day = f"{y:04d}-{m:02d}-{day_num:02d}"
+
+        mm = re.search(r"([A-Za-z][^|,]+?)\s+vs\s+([A-Za-z][^|,]+?)\s*,\s*[^|]*?\b(\d+|Final|Semi[- ]?final|Qualifier)?\s*(T20I?|ODI|Test|T20|Twenty20|One[- ]?Day)\b", row, re.I)
+        if not mm:
+            continue
+        p1, p2 = clean(mm.group(1)), clean(mm.group(2))
+        fmt = cricket_format(row, "", mm.group(3))
+        if not fmt:
+            continue
+
+        tm = re.search(r"(\d{1,2}):(\d{2})\s+GMT", row, re.I)
+        if tm:
+            hh, mi = int(tm.group(1)), int(tm.group(2))
+            start = datetime(y,m,day_num,hh,mi,tzinfo=timezone.utc).astimezone(LOCAL_TZ).isoformat()
+        else:
+            start = f"{day}T12:00:00+05:30"
+
+        comp = ""
+        for a in tr.find_all("a"):
+            txt = clean(a.get_text(" ", strip=True))
+            if txt and "vs" not in txt.lower() and len(txt) > 6 and any(k in normalize(txt) for k in ["tour","series","tri series","cup","league","world","test"]):
+                comp = txt
+                break
+        if not comp:
+            comp = "International Cricket"
+
+        x = make_event(
+            "Cricket", comp, f"{p1} vs {p2}", start, "upcoming", "match",
+            "CricSchedule", url,
+            p1, p2,
+            {"name":p1,"country_code":alpha2_for_name(p1),"is_national":preferred_cricket_country(p1)},
+            {"name":p2,"country_code":alpha2_for_name(p2),"is_national":preferred_cricket_country(p2)},
+            11
+        )
+        if x:
+            x["format"] = fmt
+            x["game"] = fmt
+            x["tournament_name"] = comp
+            x["is_country_match"] = preferred_cricket_country(p1) and preferred_cricket_country(p2)
+            rows.append(x)
+    return rows
+
 def cricinfo_matches(day):
     ddmmyyyy = datetime.strptime(day, "%Y-%m-%d").strftime("%d-%m-%Y")
     url = f"{CRICINFO_BASE}/matches/scheduled?lang=en&filterType=DATE&filterValue={ddmmyyyy}"
@@ -495,8 +581,10 @@ def cricinfo_matches(day):
         mid = m.get("objectId") or m.get("matchId") or m.get("id") or ""
         url = f"https://www.espncricinfo.com/series/{series.get('slug') or series.get('objectId') or ''}/match/{mid}" if mid else CRICKET_SOURCE
         x = make_event("Cricket", comp, f"{p1} vs {p2}", start, status_name(m.get("status")),
-                       "match", "ESPNcricinfo", url, p1, p2, meta[0], meta[1], 9, precision)
+                       "match", "ESPNcricinfo", url, p1, p2, meta[0], meta[1], 11, precision)
         if x:
+            x["format"] = cricket_format(comp, f"{p1} vs {p2}", m.get("format") or m.get("matchType") or m.get("type"))
+            x["game"] = x["format"]
             x["tournament_name"] = comp
             x["is_country_match"] = bool(x.get("international"))
             out.append(x)
@@ -617,6 +705,14 @@ def main():
             except Exception as ex:
                 health["Cricket"]["error"] = str(ex)[:200]
 
+    # Supplement the rolling feeds with a published current-month international
+    # cricket schedule so future series/tournaments are visible before they enter
+    # the rolling provider window.
+    try:
+        out.extend(parse_cricschedule_month(TARGET_MONTH))
+    except Exception as ex:
+        health["Cricket"]["error"] = str(ex)[:200]
+
     # De-duplicate cross-provider copies. Prefer ESPNcricinfo for cricket and
     # Flashscore for other sports.
     priority = {"ESPNcricinfo":0, "Flashscore":1, "SofaScore":2}
@@ -626,6 +722,16 @@ def main():
         if key not in dedup or priority.get(x["source"],9) < priority.get(dedup[key]["source"],9):
             dedup[key] = x
 
+    for x in dedup.values():
+        if x["sport"] == "Cricket":
+            x["format"] = x.get("format") or cricket_format(x.get("tournament_name") or x.get("competition",""), x.get("event_name",""))
+            x["game"] = x["format"]
+            p1, p2 = x.get("participant_1") or "", x.get("participant_2") or ""
+            x["is_country_match"] = preferred_cricket_country(p1) and preferred_cricket_country(p2)
+            if not x.get("participant_1_country_code"):
+                x["participant_1_country_code"] = alpha2_for_name(p1)
+            if not x.get("participant_2_country_code"):
+                x["participant_2_country_code"] = alpha2_for_name(p2)
     matches = [promotion_score(x) for x in dedup.values()]
     matches = sorted(matches, key=lambda z:z["start_time"])
     if not matches:
