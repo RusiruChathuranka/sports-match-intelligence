@@ -82,7 +82,7 @@ COUNTRY_CODES = {
     "germany":"DE","spain":"ES","italy":"IT","portugal":"PT","brazil":"BR","argentina":"AR",
     "mexico":"MX","colombia":"CO","chile":"CL","uruguay":"UY","paraguay":"PY","peru":"PE",
     "ecuador":"EC","japan":"JP","south korea":"KR","korea republic":"KR","china":"CN",
-    "hong kong":"HK","indonesia":"ID","malaysia":"MY","thailand":"TH","vietnam":"VN",
+    "hong kong":"HK","chinese taipei":"TW","taiwan":"TW","indonesia":"ID","malaysia":"MY","thailand":"TH","vietnam":"VN",
     "philippines":"PH","singapore":"SG","qatar":"QA","saudi arabia":"SA","iran":"IR",
     "iraq":"IQ","jordan":"JO","egypt":"EG","morocco":"MA","tunisia":"TN","nigeria":"NG",
     "ghana":"GH","kenya":"KE","uganda":"UG","tanzania":"TZ","turkey":"TR","switzerland":"CH",
