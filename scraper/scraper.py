@@ -160,6 +160,9 @@ def iso_from_epoch(value):
         return ""
 
 def status_name(raw):
+    if isinstance(raw, (int, float)) or (isinstance(raw, str) and raw.strip().isdigit()):
+        code = int(float(raw))
+        return {1:"upcoming",2:"live",3:"finished",4:"cancelled"}.get(code, "upcoming")
     s = raw if isinstance(raw, str) else str((raw or {}).get("type","") or (raw or {}).get("description",""))
     s = s.lower().replace(" ","")
     if any(k in s for k in ["inprogress","live","running","started","playing","halftime"]): return "live"
@@ -296,6 +299,7 @@ def parse_flashscore_feed(text_body, sport):
             x["home_score"] = clean(fields.get("AG"))
             x["away_score"] = clean(fields.get("AH"))
             x["sport_detail"] = esports_game_name(comp, event_name) if sport == "Esports" else ""
+            x["game"] = x["sport_detail"] if sport == "Esports" else ""
             x["tournament_name"] = comp
             x["competition_country_code"] = competition_country or None
             x["is_country_match"] = bool(x.get("international"))
@@ -454,6 +458,9 @@ def sofascore_events(slug, day):
                 x["home_score"] = (e.get("homeScore") or {}).get("display") or (e.get("homeScore") or {}).get("current")
                 x["away_score"] = (e.get("awayScore") or {}).get("display") or (e.get("awayScore") or {}).get("current")
                 x["sport_detail"] = clean((e.get("category") or {}).get("name") or (e.get("tournament") or {}).get("name"))
+                x["game"] = esports_game_name(comp, name) if SPORTS[slug] == "Esports" else ""
+                x["tournament_name"] = comp
+                x["is_country_match"] = bool(x.get("international"))
                 out.append(x)
     return out
 
@@ -489,7 +496,10 @@ def cricinfo_matches(day):
         url = f"https://www.espncricinfo.com/series/{series.get('slug') or series.get('objectId') or ''}/match/{mid}" if mid else CRICKET_SOURCE
         x = make_event("Cricket", comp, f"{p1} vs {p2}", start, status_name(m.get("status")),
                        "match", "ESPNcricinfo", url, p1, p2, meta[0], meta[1], 9, precision)
-        if x: out.append(x)
+        if x:
+            x["tournament_name"] = comp
+            x["is_country_match"] = bool(x.get("international"))
+            out.append(x)
     return out
 
 FIRECRAWL_SCHEMA = {
