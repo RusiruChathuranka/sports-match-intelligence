@@ -181,18 +181,45 @@ def flag(code):
     if len(code) != 2 or not code.isalpha(): return ""
     return "".join(chr(127397 + ord(c)) for c in code)
 
-def participant_meta(obj):
+def participant_meta(obj, fallback_country_code=""):
     obj = obj or {}
     country = obj.get("country") or obj.get("nationality") or {}
     code = clean(country.get("alpha2") if isinstance(country, dict) else country)
     name = clean(country.get("name") if isinstance(country, dict) else "")
     team_name = clean(obj.get("name") or obj.get("shortName") or obj.get("displayName"))
     code = code.upper() if len(code) == 2 else alpha2_for_name(name or team_name)
+    if not code and fallback_country_code and len(fallback_country_code) == 2:
+        code = fallback_country_code.upper()
     national = bool(obj.get("national") or obj.get("isNational") or obj.get("nationalTeam"))
     if not national and normalize(team_name) in COUNTRY_CODES:
         national = True
-    return {"name": team_name, "country_code": code if national else "", "is_national": national}
+    return {"name": team_name, "country_code": code, "is_national": national}
 
+
+ESPORTS_GAMES = [
+    ("league of legends", "League of Legends"),
+    ("valorant", "Valorant"),
+    ("counter strike", "Counter-Strike"),
+    ("counter-strike", "Counter-Strike"),
+    ("cs2", "Counter-Strike 2"),
+    ("dota 2", "Dota 2"),
+    ("dota2", "Dota 2"),
+    ("mobile legends", "Mobile Legends"),
+    ("pubg", "PUBG"),
+    ("free fire", "Free Fire"),
+    ("call of duty", "Call of Duty"),
+    ("rainbow six", "Rainbow Six"),
+    ("overwatch", "Overwatch"),
+    ("starcraft", "StarCraft"),
+    ("rocket league", "Rocket League"),
+]
+
+def esports_game_name(competition, event_name):
+    hay = normalize(f"{competition} {event_name}")
+    for key, label in ESPORTS_GAMES:
+        if normalize(key) in hay:
+            return label
+    return "Esports"
 
 def flashscore_status(raw):
     try:
@@ -214,18 +241,18 @@ def parse_flashscore_feed(text_body, sport):
             key, value = item.split("÷", 1)
             if key:
                 fields[key] = value
-        if fields.get("ZA") or fields.get("ZB") or fields.get("AC"):
-            current_comp = clean(fields.get("ZA") or fields.get("ZB") or fields.get("AC") or current_comp)
+        if fields.get("ZA"):
+            current_comp = clean(fields.get("ZA"))
         if "AA" not in fields or "AD" not in fields:
             continue
 
         start = iso_from_epoch(fields.get("AD"))
         if not start:
             continue
-        comp = clean(fields.get("ZA") or fields.get("AC") or current_comp or "Scheduled")
-        p1 = clean(fields.get("AE"))
+        comp = clean(fields.get("ZA") or current_comp or "Scheduled")
+        p1 = clean(fields.get("CX") or fields.get("AE"))
         p2 = clean(fields.get("AF"))
-        raw_name = clean(fields.get("CX") or fields.get("AN") or fields.get("AC"))
+        raw_name = clean(fields.get("AN") or fields.get("AC") or comp)
         if p1 and p2:
             event_name = f"{p1} vs {p2}"
         else:
@@ -246,8 +273,11 @@ def parse_flashscore_feed(text_body, sport):
         else:
             event_type = "match"
 
-        p1_meta = {"name": p1, "country_code": alpha2_for_name(p1), "is_national": bool(alpha2_for_name(p1))}
-        p2_meta = {"name": p2, "country_code": alpha2_for_name(p2), "is_national": bool(alpha2_for_name(p2))}
+        competition_country = alpha2_for_name(clean(fields.get("ZY")))
+        p1_code = alpha2_for_name(p1) or competition_country
+        p2_code = alpha2_for_name(p2) or competition_country
+        p1_meta = {"name": p1, "country_code": p1_code, "is_national": bool(alpha2_for_name(p1))}
+        p2_meta = {"name": p2, "country_code": p2_code, "is_national": bool(alpha2_for_name(p2))}
         importance = 7
         if sport == "Cricket":
             importance = 9
@@ -265,7 +295,10 @@ def parse_flashscore_feed(text_body, sport):
             x["provider_event_id"] = fields.get("AA")
             x["home_score"] = clean(fields.get("AG"))
             x["away_score"] = clean(fields.get("AH"))
-            x["sport_detail"] = sport
+            x["sport_detail"] = esports_game_name(comp, event_name) if sport == "Esports" else ""
+            x["tournament_name"] = comp
+            x["competition_country_code"] = competition_country or None
+            x["is_country_match"] = bool(x.get("international"))
             rows.append(x)
     return rows
 
@@ -326,12 +359,15 @@ def make_event(sport, competition, event_name, start_time, status, event_type, s
         "event_id": event_id,
         "sport": sport,
         "competition": competition,
+        "tournament_name": competition,
+        "game": "",
         "event_name": event_name or (f"{p1} vs {p2}" if p1 and p2 else competition),
         "participant_1": p1 or None,
         "participant_2": p2 or None,
         "participant_1_country_code": p1_meta.get("country_code","") or None,
         "participant_2_country_code": p2_meta.get("country_code","") or None,
         "international": international,
+        "is_country_match": international,
         "start_time": start_time,
         "time_precision": time_precision,
         "status": status,
@@ -521,7 +557,7 @@ def build_analytics(matches, target_month):
         "target_month": target_month,
         "today_local": today,
         "month_match_count": month_total,
-        "today_match_count": sum(today_sports.values()),
+        "today_match_count": len([x for x in matches if x.get("status") not in ("finished","cancelled") and x["start_time"][:10] == today]),
         "sport_month_counts": by_sport,
         "sport_today_counts": today_sports,
         "daily_counts": daily,
