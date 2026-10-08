@@ -373,7 +373,7 @@ def horse_racing_firecrawl(day):
             hh, mm = int(m.group(1)), int(m.group(2))
             # Sky Sports racecards display UK/local venue time. Use a conservative timestamp
             # conversion to an absolute time for the Sri Lankan dashboard.
-            dt_local = datetime.strptime(f"{day} {hh:02d}:{mm:02d}", "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+            dt_local = datetime.strptime(f"{day} {hh:02d}:{mm:02d}", "%Y-%m-%d %H:%M").replace(tzinfo=ZoneInfo("Europe/London"))
             start = dt_local.astimezone(LOCAL_TZ).isoformat()
             status = status_name(race.get("status"))
             out.append(make_event("Horse Racing", venue, f"{venue} — {race_name}", start, status,
