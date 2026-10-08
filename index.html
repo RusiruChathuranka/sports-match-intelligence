@@ -147,7 +147,7 @@ function renderRows(){
   $("resultMeta").textContent="Showing "+rows.length.toLocaleString()+" individual matches · "+(state.range==="today"?"today":state.range==="next7"?"next 7 days":"entire current month");
   $("rows").innerHTML=rows.length?rows.map(function(x){
     var u=x.source_url?'<a href="'+esc(x.source_url)+'" target="_blank" rel="noreferrer">'+eventName(x)+'</a>':eventName(x);
-    return '<tr><td><div class="date-main">'+localDateLabel(x.start_time)+'</div><div class="date-sub">'+localDay(x.start_time)+'</div></td><td><div class="time">'+(x.time_precision==="date_only"?"TBD":localTime(x.start_time))+'</div><div class="tiny">IST / SL</div></td><td><div class="sport-cell">'+(icon[x.sport]||"•")+' '+esc(x.sport)+'</div>'+((x.sport==="Esports"&&x.sport_detail)?'<div class="tiny">'+esc(x.sport_detail)+'</div>':'')+'</td><td><div class="comp">'+esc(x.competition)+'</div></td><td><div class="event">'+u+'</div></td><td><span class="sig '+sigClass(x.promotion_signal)+'">'+esc(x.promotion_signal)+'</span></td><td><div class="score">'+Math.round(Number(x.promotion_score||0))+'/100</div><span class="why">'+esc((x.promotion_reasons||[]).slice(0,3).join(" · ")||"general inventory")+'</span></td></tr>';
+    return '<tr><td><div class="date-main">'+localDateLabel(x.start_time)+'</div><div class="date-sub">'+localDay(x.start_time)+'</div></td><td><div class="time">'+(x.time_precision==="date_only"?"TBD":localTime(x.start_time))+'</div><div class="tiny">IST / SL</div></td><td><div class="sport-cell">'+(icon[x.sport]||"•")+' '+esc(x.sport)+'</div>'+((x.sport==="Esports"&&(x.game||x.sport_detail))?'<div class="tournament-line">'+esc(x.game||x.sport_detail)+'</div>':'')+'</td><td><div class="comp">'+esc(x.tournament_name||x.competition||"Unknown")+'</div></td><td><div class="event">'+u+'</div></td><td><span class="sig '+sigClass(x.promotion_signal)+'">'+esc(x.promotion_signal)+'</span></td><td><div class="score">'+Math.round(Number(x.promotion_score||0))+'/100</div><span class="why">'+esc((x.promotion_reasons||[]).slice(0,3).join(" · ")||"general inventory")+'</span></td></tr>';
   }).join(""):'<tr><td colspan="7"><div class="empty-box">No matches match the current filters.</div></td></tr>';
 }
 function renderCoverage(){
@@ -167,7 +167,7 @@ async function load(){
 }
 $("refresh").addEventListener("click",load);
 $("export").addEventListener("click",function(){
-  var f=["event_id","sport","competition","event_name","participant_1","participant_2","start_time","status","promotion_signal","promotion_score","source","source_url"];
+  var f=["event_id","sport","game","tournament_name","event_name","participant_1","participant_2","participant_1_country_code","participant_2_country_code","start_time","status","promotion_signal","promotion_score","source","source_url"];
   var csv=[f.join(",")].concat(state.matches.map(function(x){return f.map(function(k){return JSON.stringify(x[k]||"")}).join(",")})).join("\n");
   var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="betss-sports-match-intelligence.csv";a.click();
 });
