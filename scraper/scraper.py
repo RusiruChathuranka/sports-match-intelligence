@@ -472,6 +472,34 @@ CRICKET_PROMO_COUNTRIES = [
     "New Zealand","Bangladesh","West Indies","Afghanistan"
 ]
 
+def infer_cricket_tournament(p1, p2, start_time, fmt):
+    names = normalize(f"{p1} {p2}")
+    day = start_time[:10]
+    d = int(day[8:10]) if len(day) >= 10 else 0
+
+    def has(*vals):
+        return all(normalize(v) in names for v in vals)
+
+    if has("pakistan","sri lanka") and fmt == "T20" and d in (9,11,13):
+        return "Sri Lanka tour of Pakistan 2026"
+    if ("pakistan" in names and "england" in names or
+        "pakistan" in names and "sri lanka" in names or
+        "england" in names and "sri lanka" in names) and fmt == "ODI" and 18 <= d <= 31:
+        return "Pakistan ODI Tri-Series 2026"
+    if has("india","west indies") and fmt in ("ODI","T20"):
+        return "West Indies tour of India 2026"
+    if has("south africa","australia") and fmt == "Test":
+        return "Australia tour of South Africa 2026"
+    if has("new zealand","india") and fmt == "T20":
+        return "New Zealand tour of India 2026-27"
+    if has("namibia","ireland") and fmt == "ODI":
+        return "Ireland tour of Namibia 2026"
+    if has("afghanistan","zimbabwe") and fmt == "T20":
+        return "Afghanistan tour of Zimbabwe 2026"
+    if has("bangladesh","west indies") and fmt == "Test":
+        return "West Indies tour of Bangladesh 2026"
+    return ""
+
 def cricket_format(competition, event_name="", raw=None):
     hay = normalize(f"{competition} {event_name} {raw or ''}")
     if "test" in hay or "first class" in hay or "four day" in hay:
@@ -725,6 +753,10 @@ def main():
     for x in dedup.values():
         if x["sport"] == "Cricket":
             x["format"] = x.get("format") or cricket_format(x.get("tournament_name") or x.get("competition",""), x.get("event_name",""))
+            inferred = infer_cricket_tournament(x.get("participant_1") or "", x.get("participant_2") or "", x.get("start_time",""), x["format"])
+            if inferred:
+                x["tournament_name"] = inferred
+                x["competition"] = inferred
             x["game"] = x["format"]
             p1, p2 = x.get("participant_1") or "", x.get("participant_2") or ""
             x["is_country_match"] = preferred_cricket_country(p1) and preferred_cricket_country(p2)
