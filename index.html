@@ -145,7 +145,7 @@ function render(){
   var todayRows=eligible.filter(function(x){return localDate(x.start_time)===today}).sort(function(a,b){return (b.promotion_score||0)-(a.promotion_score||0)});
   var boardRows=todayRows.slice(0,6),boardFallback=false;
   if(!boardRows.length){
-    boardRows=eligible.filter(function(x){return next7(x.start_time)}).sort(function(a,b){return (b.promotion_score||0)-(a.promotion_score||0)).slice(0,6);
+    boardRows=eligible.filter(function(x){return next7(x.start_time)}).sort(function(a,b){return (b.promotion_score||0)-(a.promotion_score||0)}).slice(0,6);
     boardFallback=true;
   }
   $("hero").innerHTML=boardRows.length?boardRows.map(function(x){
