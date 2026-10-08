@@ -19,7 +19,7 @@ button,input,select{font:inherit}.app{max-width:1540px;margin:auto;padding:26px 
 .tabs{display:flex;gap:6px}.tab{border:1px solid var(--line);background:#0b1627;color:#9eb1ca;border-radius:9px;padding:8px 11px;font-size:10px;font-weight:900;cursor:pointer}.tab.active{background:#19304c;color:#e2efff;border-color:#3f6794}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}.search,.select{height:38px;border-radius:10px;border:1px solid var(--line);background:#0a1525;color:var(--text);padding:0 11px;outline:none}.search{min-width:250px;flex:1}
 .table-wrap{overflow:auto;border:1px solid #20324b;border-radius:13px}table{width:100%;min-width:1000px;border-collapse:collapse}thead th{padding:10px 11px;background:#091525;color:#6f86a5;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #1f3047}tbody td{padding:11px;border-bottom:1px solid #1b2b41;font-size:11px;vertical-align:top}tbody tr:hover{background:#0e1a2d}
-.date-main{font-weight:900}.date-sub{font-size:9px;color:#6d839e;margin-top:2px}.time{font-weight:950;color:#cae0f7}.tiny{font-size:9px;color:#667e9d}.sport-cell{font-weight:900}.comp{color:#a8b8cc}.event{font-weight:900;color:#eef6ff}.event a{text-decoration:none}.event a:hover{text-decoration:underline}.flags{margin-right:5px}.tournament-line{display:block;color:#6f87a5;font-size:9px;margin-top:3px}.hero-date{color:#f4c95d;font-weight:950}.format-tag{display:inline-block;margin-left:6px;padding:2px 5px;border:1px solid #345579;background:#152b47;border-radius:5px;color:#bcd7f2;font-size:8px;font-weight:950;vertical-align:1px}.score{font-weight:950}.why{display:block;max-width:240px;color:#6e86a4;font-size:9px;margin-top:4px}
+.date-main{font-weight:900}.date-sub{font-size:9px;color:#6d839e;margin-top:2px}.time{font-weight:950;color:#cae0f7}.tiny{font-size:9px;color:#667e9d}.sport-cell{font-weight:900}.comp{color:#a8b8cc}.event{font-weight:900;color:#eef6ff}.event a{text-decoration:none}.event a:hover{text-decoration:underline}.flags{display:inline-flex;align-items:center;gap:3px;margin-right:5px;vertical-align:middle}.flag-img{width:20px;height:14px;object-fit:cover;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.12)}.flag-fallback{display:inline-grid;place-items:center;width:20px;height:14px;border-radius:2px;background:#263d5a;color:#dce9f7;font-size:7px;font-weight:950}.tournament-line{display:block;color:#6f87a5;font-size:9px;margin-top:3px}.hero-date{color:#f4c95d;font-weight:950}.format-tag{display:inline-block;margin-left:6px;padding:2px 5px;border:1px solid #345579;background:#152b47;border-radius:5px;color:#bcd7f2;font-size:8px;font-weight:950;vertical-align:1px}.score{font-weight:950}.why{display:block;max-width:240px;color:#6e86a4;font-size:9px;margin-top:4px}
 .cover{display:grid;grid-template-columns:1fr 1fr;gap:8px}.source{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px;border:1px solid #233852;background:#0b1628;border-radius:11px}.sl{display:flex;gap:7px;align-items:center}.sdot{width:7px;height:7px;border-radius:50%}.ok{background:var(--good)}.warn{background:var(--warn)}.empty{background:#64748b}.sn{font-size:10px;font-weight:900}.sm{font-size:9px;color:#6e839f}.sc{font-size:11px;font-weight:950}.help{padding:13px;border:1px solid #253a55;border-radius:12px;background:#0b1728;color:#8fa5c1;font-size:10px}.help b{color:#e2efff}.footer{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;color:#677d9b;font-size:10px;margin-top:13px}
 .empty-box{padding:26px;text-align:center;color:var(--muted);border:1px dashed #2a4262;border-radius:12px}
 @media(max-width:1120px){.layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.app{padding:15px 11px 30px}.top{flex-direction:column}.top-actions{justify-content:flex-start}.kpis{grid-template-columns:1fr 1fr}.hero{grid-template-columns:1fr}.cat-grid,.cover{grid-template-columns:1fr}.title{font-size:23px}.panel{padding:14px}.search{min-width:170px}}
@@ -36,7 +36,7 @@ button,input,select{font:inherit}.app{max-width:1540px;margin:auto;padding:26px 
   <div class="card kpi"><div class="label">Today's matches</div><div class="value" id="kToday">—</div><div class="kfoot">All tracked sports · local day</div></div>
   <div class="card kpi"><div class="label" id="monthLabel">Current month</div><div class="value" id="kMonth">—</div><div class="kfoot">Individual matches / races</div></div>
   <div class="card kpi"><div class="label">Next 7 days</div><div class="value" id="kWeek">—</div><div class="kfoot">From current Sri Lanka time</div></div>
-  <div class="card kpi"><div class="label">Today's promotion priorities</div><div class="value" id="kPromote">—</div><div class="kfoot">Events scored <b style="color:#a9c8ee">65+</b></div></div>
+  <div class="card kpi"><div class="label">Today's promotion priorities</div><div class="value" id="kPromote">—</div><div class="kfoot">Events scored <b style="color:#a9c8ee">48+</b></div></div>
 </section>
 
 <section class="layout">
@@ -78,6 +78,7 @@ button,input,select{font:inherit}.app{max-width:1540px;margin:auto;padding:26px 
 <script>
 var TZ="Asia/Colombo",state={matches:[],data:null,range:"today"},$=function(id){return document.getElementById(id)};
 var icon={Cricket:"🏏",Soccer:"⚽",Tennis:"🎾",Basketball:"🏀",Rugby:"🏉","Formula 1":"🏎️",Esports:"🎮",Boxing:"🥊",Badminton:"🏸",Volleyball:"🏐","Horse Racing":"🏇"};
+var countryVisualCodes={"england":"gb-eng","scotland":"gb-sct","wales":"gb-wls","west indies":"","sri lanka":"lk","india":"in","pakistan":"pk","australia":"au","south africa":"za","new zealand":"nz","bangladesh":"bd","afghanistan":"af","ireland":"ie","zimbabwe":"zw","namibia":"na","united arab emirates":"ae","nepal":"np","oman":"om","france":"fr","germany":"de","spain":"es","italy":"it","portugal":"pt","brazil":"br","argentina":"ar","japan":"jp","south korea":"kr","china":"cn","hong kong":"hk","taiwan":"tw","canada":"ca","usa":"us","turkey":"tr","switzerland":"ch","belgium":"be","czech republic":"cz","czechia":"cz","greece":"gr","romania":"ro","serbia":"rs","croatia":"hr","slovenia":"si","slovakia":"sk","hungary":"hu","poland":"pl"};
 var countryCodes={"sri lanka":"LK","india":"IN","pakistan":"PK","england":"GB","australia":"AU","south africa":"ZA","new zealand":"NZ","bangladesh":"BD","west indies":"WI","afghanistan":"AF","ireland":"IE","zimbabwe":"ZW","namibia":"NA","uae":"AE","united arab emirates":"AE","nepal":"NP","oman":"OM","scotland":"GB","netherlands":"NL","france":"FR","germany":"DE","spain":"ES","italy":"IT","portugal":"PT","brazil":"BR","argentina":"AR","japan":"JP","south korea":"KR","china":"CN","hong kong":"HK","taiwan":"TW","canada":"CA","usa":"US","united states":"US","turkey":"TR","switzerland":"CH","belgium":"BE","czech republic":"CZ","czechia":"CZ","greece":"GR","romania":"RO","serbia":"RS","croatia":"HR","slovenia":"SI","slovakia":"SK","hungary":"HU","poland":"PL"};
 var promoCountries=["Sri Lanka","India","Pakistan","England","Australia","South Africa","New Zealand","Bangladesh","West Indies","Afghanistan"];
 
@@ -97,7 +98,19 @@ function inferFlagCode(name){
   for(var i=0;i<keys.length;i++)if(n.indexOf(keys[i])>=0)return countryCodes[keys[i]];
   return "";
 }
-function flagFor(code,name){return flag(code||inferFlagCode(name))}
+function visualCode(code,name){
+  var n=String(name||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+  if(countryVisualCodes[n]!==undefined)return countryVisualCodes[n];
+  var keys=Object.keys(countryVisualCodes);
+  for(var i=0;i<keys.length;i++)if(n.indexOf(keys[i])>=0)return countryVisualCodes[keys[i]];
+  return String(code||inferFlagCode(name)||"").toLowerCase();
+}
+function flagFor(code,name){
+  var vc=visualCode(code,name);
+  if(vc==="")return '<span class="flag-fallback">WI</span>';
+  var label=String(name||code||"").replace(/"/g,"&quot;");
+  return '<img class="flag-img" src="https://flagcdn.com/20x15/'+vc+'.png" alt="'+label+' flag" onerror="this.outerHTML=&quot;<span class=\"flag-fallback\">'+String(code||"").slice(0,2).toUpperCase()+'</span>&quot;">';
+}
 function isPromoCricket(x){
   if(x.sport!=="Cricket"||x.status==="finished"||x.status==="cancelled")return false;
   var a=String(x.participant_1||"").toLowerCase(),b=String(x.participant_2||"").toLowerCase();
@@ -106,7 +119,7 @@ function isPromoCricket(x){
 }
 function eventName(x){
   var f1=flagFor(x.participant_1_country_code,x.participant_1),f2=flagFor(x.participant_2_country_code,x.participant_2);
-  var flags=(f1||f2)?'<span class="flags">'+f1+f2+'</span>':'';
+  var flags=(x.participant_1||x.participant_2)?'<span class="flags">'+f1+f2+'</span>':'';
   if(x.participant_1&&x.participant_2){
     return flags+esc(x.participant_1)+' <span style="color:#6d819c">vs</span> '+esc(x.participant_2);
   }
