@@ -105,7 +105,7 @@ function render(){
   $("kToday").textContent=a.today_match_count!=null?a.today_match_count:state.matches.filter(function(x){return localDate(x.start_time)===today}).length;
   $("kMonth").textContent=a.month_match_count!=null?a.month_match_count:state.matches.length;
   $("kWeek").textContent=state.matches.filter(function(x){return next7(x.start_time)}).length;
-  $("kPromote").textContent=state.matches.filter(function(x){return localDate(x.start_time)===today&&x.promotion_signal==="Promote"}).length;
+  $("kPromote").textContent=state.matches.filter(function(x){return localDate(x.start_time)===today&&x.status!=="finished"&&x.status!=="cancelled"&&x.is_country_match===true&&x.promotion_signal==="Promote"}).length;
   var md=new Date(month+"-01T00:00:00Z");
   $("monthLabel").textContent=new Intl.DateTimeFormat("en-US",{month:"long",year:"numeric"}).format(md);
   $("monthBadge").textContent=(a.month_match_count||state.matches.length)+" matches";
