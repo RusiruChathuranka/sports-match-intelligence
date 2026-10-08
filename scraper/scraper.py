@@ -43,6 +43,8 @@ FLASHSCORE_SPORTS = {
     16: "Boxing",
     21: "Badminton",
     31: "Formula 1",
+    32: "Formula 1",
+    33: "Formula 1",
     35: "Horse Racing",
     36: "Esports",
 }
@@ -169,7 +171,8 @@ def alpha2_for_name(name):
     n = normalize(name)
     if n in COUNTRY_CODES: return COUNTRY_CODES[n]
     for k, code in COUNTRY_CODES.items():
-        if n == normalize(k) or n.endswith(" " + normalize(k)):
+        nk = normalize(k)
+        if n == nk or n.endswith(" " + nk) or n.startswith(nk + " "):
             return code
     return ""
 
@@ -496,8 +499,8 @@ def promotion_score(x):
     except Exception:
         pass
     x["promotion_score"] = round(min(100, score),1)
-    if score >= 65: x["promotion_signal"] = "Promote"
-    elif score >= 48: x["promotion_signal"] = "Consider"
+    if score >= 48: x["promotion_signal"] = "Promote"
+    elif score >= 34: x["promotion_signal"] = "Consider"
     else: x["promotion_signal"] = "Monitor"
     x["promotion_reasons"] = reasons[:4]
     return x
