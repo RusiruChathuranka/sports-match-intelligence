@@ -18,7 +18,7 @@ button,input,select{font:inherit}.app{max-width:1540px;margin:auto;padding:26px 
 .tabs{display:flex;gap:6px}.tab{border:1px solid var(--line);background:#0b1627;color:#9eb1ca;border-radius:9px;padding:8px 11px;font-size:10px;font-weight:900;cursor:pointer}.tab.active{background:#19304c;color:#e2efff;border-color:#3f6794}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}.search,.select{height:38px;border-radius:10px;border:1px solid var(--line);background:#0a1525;color:var(--text);padding:0 11px;outline:none}.search{min-width:250px;flex:1}
 .table-wrap{overflow:auto;border:1px solid #20324b;border-radius:13px}table{width:100%;min-width:1000px;border-collapse:collapse}thead th{padding:10px 11px;background:#091525;color:#6f86a5;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #1f3047}tbody td{padding:11px;border-bottom:1px solid #1b2b41;font-size:11px;vertical-align:top}tbody tr:hover{background:#0e1a2d}
-.date-main{font-weight:900}.date-sub{font-size:9px;color:#6d839e;margin-top:2px}.time{font-weight:950;color:#cae0f7}.tiny{font-size:9px;color:#667e9d}.sport-cell{font-weight:900}.comp{color:#a8b8cc}.event{font-weight:900;color:#eef6ff}.event a{text-decoration:none}.event a:hover{text-decoration:underline}.flags{margin-right:5px}.score{font-weight:950}.why{display:block;max-width:240px;color:#6e86a4;font-size:9px;margin-top:4px}
+.date-main{font-weight:900}.date-sub{font-size:9px;color:#6d839e;margin-top:2px}.time{font-weight:950;color:#cae0f7}.tiny{font-size:9px;color:#667e9d}.sport-cell{font-weight:900}.comp{color:#a8b8cc}.event{font-weight:900;color:#eef6ff}.event a{text-decoration:none}.event a:hover{text-decoration:underline}.flags{margin-right:5px}.tournament-line{display:block;color:#6f87a5;font-size:9px;margin-top:3px}.hero-date{color:#f4c95d;font-weight:950}.score{font-weight:950}.why{display:block;max-width:240px;color:#6e86a4;font-size:9px;margin-top:4px}
 .cover{display:grid;grid-template-columns:1fr 1fr;gap:8px}.source{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px;border:1px solid #233852;background:#0b1628;border-radius:11px}.sl{display:flex;gap:7px;align-items:center}.sdot{width:7px;height:7px;border-radius:50%}.ok{background:var(--good)}.warn{background:var(--warn)}.empty{background:#64748b}.sn{font-size:10px;font-weight:900}.sm{font-size:9px;color:#6e839f}.sc{font-size:11px;font-weight:950}.help{padding:13px;border:1px solid #253a55;border-radius:12px;background:#0b1728;color:#8fa5c1;font-size:10px}.help b{color:#e2efff}.footer{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;color:#677d9b;font-size:10px;margin-top:13px}
 .empty-box{padding:26px;text-align:center;color:var(--muted);border:1px dashed #2a4262;border-radius:12px}
 @media(max-width:1120px){.layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.app{padding:15px 11px 30px}.top{flex-direction:column}.top-actions{justify-content:flex-start}.kpis{grid-template-columns:1fr 1fr}.hero{grid-template-columns:1fr}.cat-grid,.cover{grid-template-columns:1fr}.title{font-size:23px}.panel{padding:14px}.search{min-width:170px}}
@@ -63,7 +63,7 @@ button,input,select{font:inherit}.app{max-width:1540px;margin:auto;padding:26px 
 <section class="card panel">
   <div class="head"><div><div class="ptitle">📋 Match inventory</div><div class="psub" id="resultMeta">Loading…</div></div><div class="tabs"><button class="tab active" data-range="today">Today</button><button class="tab" data-range="next7">Next 7 Days</button><button class="tab" data-range="month">Entire Month</button></div></div>
   <div class="toolbar"><input class="search" id="search" placeholder="Search teams, players, competition or sport…"><select class="select" id="sportFilter"><option>All Sports</option></select><select class="select" id="signalFilter"><option>All Signals</option><option>Promote</option><option>Consider</option><option>Monitor</option></select></div>
-  <div class="table-wrap"><table><thead><tr><th>Date</th><th>Time · IST</th><th>Sport</th><th>Competition</th><th>Match / Event</th><th>Signal</th><th>Score</th></tr></thead><tbody id="rows"></tbody></table></div>
+  <div class="table-wrap"><table><thead><tr><th>Date</th><th>Time · IST</th><th>Category</th><th>Tournament</th><th>Match / Event</th><th>Signal</th><th>Score</th></tr></thead><tbody id="rows"></tbody></table></div>
 </section>
 
 <section class="layout" style="margin-top:13px">
@@ -88,10 +88,11 @@ function nowText(){return new Intl.DateTimeFormat("en-GB",{timeZone:TZ,weekday:"
 function next7(iso){var n=Date.now(),t=new Date(iso).getTime();return t>=n&&t<n+604800000}
 function flag(code){if(!code||code.length!==2)return"";return String.fromCodePoint.apply(null,code.toUpperCase().split("").map(function(c){return 127397+c.charCodeAt(0)}))}
 function eventName(x){
-  if(x.international&&x.participant_1&&x.participant_2){
-    return '<span class="flags">'+flag(x.participant_1_country_code)+flag(x.participant_2_country_code)+'</span>'+esc(x.participant_1)+' <span style="color:#6d819c">vs</span> '+esc(x.participant_2);
+  var flags=(x.participant_1_country_code||x.participant_2_country_code)?'<span class="flags">'+flag(x.participant_1_country_code)+flag(x.participant_2_country_code)+'</span>':'';
+  if(x.participant_1&&x.participant_2){
+    return flags+esc(x.participant_1)+' <span style="color:#6d819c">vs</span> '+esc(x.participant_2);
   }
-  return esc(x.event_name||((x.participant_1||"")+" vs "+(x.participant_2||"")));
+  return flags+esc(x.event_name||((x.participant_1||"")+" vs "+(x.participant_2||"")));
 }
 function sigClass(x){return String(x||"Monitor").toLowerCase()}
 function cats(el,counts){
@@ -108,18 +109,30 @@ function render(){
   var md=new Date(month+"-01T00:00:00Z");
   $("monthLabel").textContent=new Intl.DateTimeFormat("en-US",{month:"long",year:"numeric"}).format(md);
   $("monthBadge").textContent=(a.month_match_count||state.matches.length)+" matches";
-  var todayRows=state.matches.filter(function(x){return localDate(x.start_time)===today}).sort(function(a,b){return (b.promotion_score||0)-(a.promotion_score||0)});
-  $("hero").innerHTML=todayRows.length?todayRows.slice(0,6).map(function(x){
-    return '<div class="hero-card"><span class="sig '+sigClass(x.promotion_signal)+'">'+esc(x.promotion_signal)+'</span><div class="hsport">'+(icon[x.sport]||"•")+' '+esc(x.sport)+'</div><div class="hevent">'+eventName(x)+'</div><div class="hcomp">'+esc(x.competition)+'</div><div class="hmeta"><span>⏱ '+(x.time_precision==="date_only"?"TBD":localTime(x.start_time)+" IST")+'</span><span class="reason">'+esc((x.promotion_reasons||[])[0]||"inventory")+'</span></div></div>';
-  }).join(""):'<div class="empty-box">No fixtures found for today.</div>';
-  var tc={};todayRows.forEach(function(x){tc[x.sport]=(tc[x.sport]||0)+1});
+  var eligible=state.matches.filter(function(x){
+    return x.status!=="finished"&&x.status!=="cancelled"&&x.is_country_match===true&&new Date(x.start_time)>new Date();
+  }).sort(function(a,b){return new Date(a.start_time)-new Date(b.start_time)});
+  var todayRows=eligible.filter(function(x){return localDate(x.start_time)===today}).sort(function(a,b){return (b.promotion_score||0)-(a.promotion_score||0)});
+  var boardRows=todayRows.slice(0,6);
+  var boardFallback=false;
+  if(!boardRows.length){
+    boardRows=eligible.filter(function(x){return next7(x.start_time)}).sort(function(a,b){return (b.promotion_score||0)-(a.promotion_score||0)).slice(0,6);
+    boardFallback=true;
+  }
+  $("hero").innerHTML=boardRows.length?boardRows.map(function(x){
+    var game=x.game||((x.sport==="Esports"&&x.sport_detail)?x.sport_detail:"");
+    return '<div class="hero-card"><span class="sig '+sigClass(x.promotion_signal)+'">'+esc(x.promotion_signal)+'</span><div class="hsport">'+(icon[x.sport]||"•")+' '+esc(x.sport)+(game?' · '+esc(game):"")+'</div><div class="hevent">'+eventName(x)+'</div><div class="hcomp">'+esc(x.tournament_name||x.competition||"Unknown")+'</div><div class="hmeta"><span class="'+(boardFallback?"hero-date":"")+'">📅 '+localDateLabel(x.start_time)+' · '+(x.time_precision==="date_only"?"Time TBD":localTime(x.start_time)+" IST")+'</span><span class="reason">'+esc((x.promotion_reasons||[])[0]||"country fixture")+'</span></div></div>';
+  }).join(""):'<div class="empty-box">No international/country fixtures found in the next 7 days.</div>';
+  $("hero").previousElementSibling.querySelector(".ptitle").textContent=boardFallback?"📌 Next 7 Days · Promotion Board":"🔥 Today's Promotion Board";
+  $("hero").previousElementSibling.querySelector(".psub").textContent=boardFallback?"No eligible country fixtures today — next available international fixtures are shown":"Country / national-team fixtures only";
+  var tc={};state.matches.filter(function(x){return x.status!=="finished"&&x.status!=="cancelled"&&localDate(x.start_time)===today}).forEach(function(x){tc[x.sport]=(tc[x.sport]||0)+1});
   cats("todayCats",tc);
   cats("monthCats",a.sport_month_counts||{});
   var dc=a.daily_counts||{},days=Object.keys(dc).sort(),max=Math.max.apply(null,[1].concat(days.map(function(d){return dc[d]})));
   $("monthChart").innerHTML=days.length?days.map(function(d){return '<div class="bar-col"><div class="bar-v">'+dc[d]+'</div><div class="bar" style="height:'+Math.max(4,dc[d]/max*105)+'px"></div><div class="bar-l">'+d.slice(8)+'</div></div>'}).join(""):'<div class="empty-box">No volume data.</div>';
   renderRows();renderCoverage();
   $("updated").textContent="Last refresh "+(state.data&&state.data.generated_at_local?new Intl.DateTimeFormat("en-GB",{timeZone:TZ,dateStyle:"medium",timeStyle:"short"}).format(new Date(state.data.generated_at_local)):"—");
-  $("sourceNote").textContent=state.matches.length.toLocaleString()+" normalized events · 1 row = 1 match/race · SofaScore + ESPNcricinfo + Sky Sports Racing";
+  $("sourceNote").textContent=state.matches.length.toLocaleString()+" total month inventory · completed fixtures hidden from lists · SofaScore + ESPNcricinfo + Flashscore";
 }
 function populateSports(){
   var list=[...new Set(state.matches.map(function(x){return x.sport}))].sort();
@@ -129,7 +142,7 @@ function renderRows(){
   var q=$("search").value.toLowerCase(),sf=$("sportFilter").value,sg=$("signalFilter").value,today=dateKey(),month=today.slice(0,7);
   var rows=state.matches.filter(function(x){
     var d=localDate(x.start_time),rangeOk=state.range==="today"?d===today:state.range==="next7"?next7(x.start_time):d.slice(0,7)===month;
-    return rangeOk&&(sf==="All Sports"||x.sport===sf)&&(sg==="All Signals"||x.promotion_signal===sg)&&JSON.stringify(x).toLowerCase().indexOf(q)>=0;
+    return rangeOk&&x.status!=="finished"&&x.status!=="cancelled"&&(sf==="All Sports"||x.sport===sf)&&(sg==="All Signals"||x.promotion_signal===sg)&&JSON.stringify(x).toLowerCase().indexOf(q)>=0;
   }).sort(function(a,b){return new Date(a.start_time)-new Date(b.start_time)});
   $("resultMeta").textContent="Showing "+rows.length.toLocaleString()+" individual matches · "+(state.range==="today"?"today":state.range==="next7"?"next 7 days":"entire current month");
   $("rows").innerHTML=rows.length?rows.map(function(x){
