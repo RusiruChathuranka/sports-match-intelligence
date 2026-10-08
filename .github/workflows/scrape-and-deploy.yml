@@ -1,9 +1,10 @@
-name: Scrape sports and deploy
+name: Sports Intelligence — refresh and deploy
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "15 */6 * * *"
+    - cron: "0 0 * * *"
+      timezone: "Asia/Colombo"
   push:
     branches: [main]
 
@@ -11,6 +12,10 @@ permissions:
   contents: read
   pages: write
   id-token: write
+
+concurrency:
+  group: "sports-intelligence-pages"
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
@@ -21,22 +26,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Build monthly sports calendar
+
+      - name: Build current-month sports inventory
         env:
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: python scraper/scraper.py
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: "."
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
